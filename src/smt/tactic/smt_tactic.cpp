@@ -152,6 +152,7 @@ public:
         try {
             IF_VERBOSE(10, verbose_stream() << "(smt.tactic start)\n";);
             ast_manager & m = in->m();
+            // IF_VERBOSE(10, m.display(verbose_stream() << "SMT-TACTIC AST:\n"););
             tactic_report report("smt", *in);
             TRACE("smt_tactic", tout << this << "\nAUTO_CONFIG: " << fparams().m_auto_config << " HIDIV0: " << fparams().m_hi_div0 << " "
                   << " PREPROCESS: " << fparams().m_preprocess << "\n";
@@ -309,6 +310,7 @@ public:
 };
 
 static tactic * mk_seq_smt_tactic(params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk SMT tactic)\n";);
     return alloc(smt_tactic, p);
 }
 
@@ -318,6 +320,7 @@ tactic * mk_parallel_smt_tactic(ast_manager& m, params_ref const& p) {
 }
 
 tactic * mk_smt_tactic(ast_manager& m, params_ref const& p, symbol const& logic) {
+    // IF_VERBOSE(10, m.display(verbose_stream() << "SMT-TACTIC AST:\n"););
     parallel_params pp(p);
     return pp.enable() ? mk_parallel_tactic(mk_smt_solver(m, p, logic), p) : mk_seq_smt_tactic(p);
 }

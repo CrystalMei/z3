@@ -31,6 +31,7 @@ void theory_bv_params::updt_params(params_ref const & _p) {
 #define DISPLAY_PARAM(X) out << #X"=" << X << std::endl;
 
 void theory_bv_params::display(std::ostream & out) const {
+    IF_VERBOSE(10, verbose_stream() << "Theory BV_Params Display\n"; );
     DISPLAY_PARAM(m_bv_mode);
     DISPLAY_PARAM(m_hi_div0);
     DISPLAY_PARAM(m_bv_reflect);

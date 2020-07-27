@@ -136,6 +136,7 @@ private:
 };
 
 static tactic * mk_qfufbv_preamble1(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_UFBV preamble1 tactic)\n";);
     params_ref simp2_p = p;
     simp2_p.set_bool("pull_cheap_ite", true);
     simp2_p.set_bool("push_ite_bv", false);
@@ -163,6 +164,7 @@ static tactic * mk_qfufbv_preamble1(ast_manager & m, params_ref const & p) {
 }
 
 static tactic * mk_qfufbv_preamble(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_UFBV preamble tactic)\n";);
     return and_then(mk_simplify_tactic(m),
                     mk_propagate_values_tactic(m),
                     mk_solve_eqs_tactic(m),
@@ -175,6 +177,7 @@ static tactic * mk_qfufbv_preamble(ast_manager & m, params_ref const & p) {
 }
 
 tactic * mk_qfufbv_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_UFBV tactic)\n";);
     params_ref main_p;
     main_p.set_bool("elim_and", true);
     main_p.set_bool("blast_distinct", true);
@@ -190,6 +193,7 @@ tactic * mk_qfufbv_tactic(ast_manager & m, params_ref const & p) {
 }
 
 tactic * mk_qfufbv_ackr_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_UFBV ackr tactic)\n";);
     tactic * const preamble_t = mk_qfufbv_preamble1(m, p);
 
     tactic * const actual_tactic = alloc(qfufbv_ackr_tactic, m, p);

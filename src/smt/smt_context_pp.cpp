@@ -311,7 +311,9 @@ namespace smt {
     }
 
     void context::display_theories(std::ostream & out) const {
+        IF_VERBOSE(10, verbose_stream() << "\tTheory Display\n"; );
         for (theory* th : m_theory_set) {
+            IF_VERBOSE(10, verbose_stream() << th->m_id << "\n"; );
             th->display(out);
         }
     }

@@ -27,6 +27,7 @@ Notes:
 #include "tactic/arith/probe_arith.h"
 
 tactic * mk_qflra_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_LRA tactic)\n";);
     params_ref pivot_p;
     pivot_p.set_bool("arith.greatest_error_pivot", true);
 

@@ -62,6 +62,10 @@ struct append_assumptions {
 };
 
 lbool solver_na2as::check_sat_core(unsigned num_assumptions, expr * const * assumptions) {
+    IF_VERBOSE(10, verbose_stream() << "\t(solver_na2as check_sat_core)\n";);
+    IF_VERBOSE(101, verbose_stream() << "\nsolver check_sat_core\n";);
+    IF_VERBOSE(101, display(verbose_stream()););
+    IF_VERBOSE(101, verbose_stream() << "\n";);
     append_assumptions app(m_assumptions, num_assumptions, assumptions);
     TRACE("solver_na2as", display(tout););
     return check_sat_core2(m_assumptions.size(), m_assumptions.c_ptr());

@@ -335,6 +335,7 @@ public:
 };
 
 tactic * mk_lia2pb_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk-lia2pb-tactic)\n";);
     return clean(alloc(lia2pb_tactic, m, p));
 }
 

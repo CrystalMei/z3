@@ -34,6 +34,7 @@ Notes:
 #define MEMLIMIT 300
 
 static tactic * mk_qfbv_preamble(ast_manager& m, params_ref const& p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_BV preamble tactic)\n";);
 
     params_ref solve_eq_p;
     // conservative gaussian elimination.
@@ -121,6 +122,7 @@ static tactic * mk_qfbv_tactic(ast_manager& m, params_ref const & p, tactic* sat
 
 
 tactic * mk_qfbv_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_BV tactic)\n";);
     tactic * new_sat = cond(mk_produce_proofs_probe(),
                             and_then(mk_simplify_tactic(m), mk_smt_tactic(m)),
                             mk_psat_tactic(m, p));

@@ -202,6 +202,9 @@ public:
     }
 
     lbool check_sat_core(unsigned num_assumptions, expr * const * assumptions) override {
+        // IF_VERBOSE(101, verbose_stream() << "\ncombined solver check_sat\n";);
+        // IF_VERBOSE(101, solver::display(verbose_stream()););
+        // IF_VERBOSE(101, verbose_stream() << "\n";);
         m_check_sat_executed  = true;        
         m_use_solver1_results = false;
 
@@ -215,7 +218,10 @@ public:
         
         if (m_inc_mode) {
             if (m_inc_timeout == UINT_MAX) {
-                IF_VERBOSE(PS_VB_LVL, verbose_stream() << "(combined-solver \"using solver 2 (without a timeout)\")\n";);            
+                IF_VERBOSE(PS_VB_LVL, verbose_stream() << "(combined-solver \"using solver 2 (without a timeout)\")\n";);  
+                // IF_VERBOSE(101, verbose_stream() << "\nbefore solver2 check_sat\n";);
+                // IF_VERBOSE(101, solver::display(verbose_stream()););
+                // IF_VERBOSE(101, verbose_stream() << "\n";);          
                 lbool r = m_solver2->check_sat_core(num_assumptions, assumptions);
                 if (r != l_undef || !use_solver1_when_undef() || !get_manager().inc()) {
                     return r;

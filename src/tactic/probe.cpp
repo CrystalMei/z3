@@ -561,6 +561,7 @@ public:
 };
 
 probe * mk_has_quantifier_probe() {
+    IF_VERBOSE(10, verbose_stream() << "\t(Quantifier Probe)\n";);
     return alloc(has_quantifier_probe);
 }
 

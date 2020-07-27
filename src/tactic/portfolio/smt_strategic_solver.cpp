@@ -32,6 +32,7 @@ Notes:
 #include "tactic/smtlogics/qfufbv_tactic.h"
 #include "tactic/smtlogics/qfidl_tactic.h"
 #include "tactic/smtlogics/nra_tactic.h"
+#include "tactic/smtlogics/dla_tactic.h"
 #include "tactic/portfolio/default_tactic.h"
 #include "tactic/fd_solver/fd_solver.h"
 #include "tactic/fd_solver/smtfd_solver.h"
@@ -41,6 +42,7 @@ Notes:
 #include "smt/smt_solver.h"
 #include "sat/sat_solver/inc_sat_solver.h"
 #include "ast/rewriter/bv_rewriter.h"
+#include "ast/ast_pp.h"
 #include "solver/solver2tactic.h"
 #include "solver/parallel_tactic.h"
 #include "solver/parallel_params.hpp"
@@ -100,7 +102,9 @@ tactic * mk_tactic_for_logic(ast_manager & m, params_ref const & p, symbol const
         return mk_horn_tactic(m, p);
     else if ((logic == "QF_FD" || logic == "SAT") && !m.proofs_enabled())
         return mk_fd_tactic(m, p);
-    else 
+    else if (logic == "DLA")
+        return mk_dla_tactic(m, p);
+    else
         return mk_default_tactic(m, p);
 }
 
@@ -158,6 +162,8 @@ public:
         if (!t) {
             t = mk_tactic_for_logic(m, p, l);
         }
+
+        IF_VERBOSE(10, verbose_stream() << "mk_combined_solver...\n";);
         return mk_combined_solver(mk_tactic2solver(m, t.get(), p, proofs_enabled, models_enabled, unsat_core_enabled, l),
                                   mk_solver_for_logic(m, p, l), 
                                   p);

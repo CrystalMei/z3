@@ -399,27 +399,33 @@ public:
 
 }
 
-probe * mk_is_qflia_probe() {
+probe * mk_is_qflia_probe() { 
+    IF_VERBOSE(10, verbose_stream() << "(QF-LIA probe check)\n";);
     return alloc(is_qflia_probe);
 }
 
 probe * mk_is_qfauflia_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(QF-AUFLIA probe check)\n";);
     return alloc(is_qfauflia_probe);
 }
 
 probe * mk_is_qflra_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(QF-LRA probe check)\n";);
     return alloc(is_qflra_probe);
 }
 
 probe * mk_is_qflira_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(QF-LIRA probe check)\n";);
     return alloc(is_qflira_probe);
 }
 
 probe * mk_is_ilp_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(ILP probe check)\n";);
     return alloc(is_ilp_probe);
 }
 
 probe * mk_is_mip_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(MIP probe check)\n";);
     return alloc(is_mip_probe);
 }
 
@@ -709,37 +715,46 @@ public:
 }
 
 probe * mk_is_qfnia_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(QF-NIA probe check)\n";);
     return alloc(is_qfnia_probe);
 }
 
 probe * mk_is_qfnra_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(QF-NRA probe check)\n";);
     return alloc(is_qfnra_probe);
 }
 
 probe * mk_is_nia_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(NIA probe check)\n";);
     return alloc(is_nia_probe);
 }
 
 probe * mk_is_nra_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(NRA probe check)\n";);
     return alloc(is_nra_probe);
 }
 
 probe * mk_is_nira_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(NIRA probe check)\n";);
     return alloc(is_nira_probe);
 }
 
 probe * mk_is_lia_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(LIA probe check)\n";);
     return alloc(is_lia_probe);
 }
 
 probe * mk_is_lra_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(LRA probe check)\n";);
     return alloc(is_lra_probe);
 }
 
 probe * mk_is_lira_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(LIRA probe check)\n";);
     return alloc(is_lira_probe);
 }
 
 probe* mk_is_qfufnra_probe() {
+    IF_VERBOSE(10, verbose_stream() << "(AF-UFNRA probe check)\n";);
     return alloc(is_qfufnra_probe);
 }

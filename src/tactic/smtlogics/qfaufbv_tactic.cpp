@@ -29,6 +29,7 @@ Notes:
 #include "smt/tactic/smt_tactic.h"
 
 static tactic * mk_qfaufbv_preamble(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_AUFBV preamble tactic)\n";);
 
     params_ref simp2_p = p;
     simp2_p.set_bool("som", true);
@@ -51,6 +52,8 @@ static tactic * mk_qfaufbv_preamble(ast_manager & m, params_ref const & p) {
 }
 
 tactic * mk_qfaufbv_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_AUFBV tactic)\n";);
+
     params_ref main_p;
     main_p.set_bool("elim_and", true);
     main_p.set_bool("sort_store", true);

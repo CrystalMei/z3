@@ -81,3 +81,8 @@ doc/code
 .vs
 examples/**/obj
 CMakeSettings.json
+
+bin/
+include/
+lib/
+src/util/z3_version.h

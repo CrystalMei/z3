@@ -40,6 +40,7 @@ void theory_str_params::updt_params(params_ref const & _p) {
 #define DISPLAY_PARAM(X) out << #X"=" << X << std::endl;
 
 void theory_str_params::display(std::ostream & out) const {
+    IF_VERBOSE(10, verbose_stream() << "Theory Str_Params Display\n"; );
     DISPLAY_PARAM(m_StrongArrangements);
     DISPLAY_PARAM(m_AggressiveLengthTesting);
     DISPLAY_PARAM(m_AggressiveValueTesting);

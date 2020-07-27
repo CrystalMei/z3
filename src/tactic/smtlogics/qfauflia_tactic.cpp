@@ -25,6 +25,8 @@ Notes:
 #include "smt/tactic/smt_tactic.h"
 
 tactic * mk_qfauflia_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_AUFLIA tactic)\n";);
+
     params_ref main_p;
     main_p.set_bool("elim_and", true);
     main_p.set_bool("som", true);

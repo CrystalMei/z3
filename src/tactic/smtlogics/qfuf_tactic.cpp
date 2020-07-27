@@ -25,6 +25,7 @@ Notes:
 #include "smt/tactic/smt_tactic.h"
 
 tactic * mk_qfuf_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_UF tactic)\n";);
     params_ref s2_p;
     s2_p.set_bool("pull_cheap_ite", true);
     s2_p.set_bool("local_ctx", true);

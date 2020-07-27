@@ -33,6 +33,7 @@ Notes:
 #include "nlsat/tactic/qfnra_nlsat_tactic.h"
 
 static tactic * mk_qfnia_bv_solver(ast_manager & m, params_ref const & p_ref) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_NIA BV solver)\n";);
     params_ref p = p_ref;
     p.set_bool("flat", false);
     p.set_bool("hi_div0", true); 
@@ -58,6 +59,7 @@ static tactic * mk_qfnia_bv_solver(ast_manager & m, params_ref const & p_ref) {
 }
 
 static tactic * mk_qfnia_preamble(ast_manager & m, params_ref const & p_ref) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_NIA preamble tactic)\n";);
     params_ref pull_ite_p = p_ref;
     pull_ite_p.set_bool("pull_cheap_ite", true);
     pull_ite_p.set_bool("local_ctx", true);
@@ -83,6 +85,7 @@ static tactic * mk_qfnia_preamble(ast_manager & m, params_ref const & p_ref) {
 }
 
 static tactic * mk_qfnia_sat_solver(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_NIA SAT solver)\n";);
     params_ref nia2sat_p = p;
     nia2sat_p.set_uint("nla2bv_max_bv_size", 64);  
     params_ref simp_p = p;
@@ -95,6 +98,7 @@ static tactic * mk_qfnia_sat_solver(ast_manager & m, params_ref const & p) {
 }
 
 static tactic * mk_qfnia_nlsat_solver(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_NIA NLSAT solver)\n";);
     params_ref nia2sat_p = p;
     nia2sat_p.set_uint("nla2bv_max_bv_size", 64);  
     params_ref simp_p = p;
@@ -107,6 +111,7 @@ static tactic * mk_qfnia_nlsat_solver(ast_manager & m, params_ref const & p) {
 }
 
 static tactic * mk_qfnia_smt_solver(ast_manager& m, params_ref const& p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_NIA SMT solver)\n";);
     params_ref simp_p = p;
     simp_p.set_bool("som", true); // expand into sums of monomials
     return and_then(
@@ -115,6 +120,7 @@ static tactic * mk_qfnia_smt_solver(ast_manager& m, params_ref const& p) {
 }
 
 tactic * mk_qfnia_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_NIA tactic)\n";);
     return and_then(
         mk_report_verbose_tactic("(qfnia-tactic)", 10),
         mk_qfnia_preamble(m, p),

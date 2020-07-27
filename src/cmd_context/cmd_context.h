@@ -319,6 +319,7 @@ public:
     void global_params_updated(); // this method should be invoked when global (and module) params are updated.
     bool set_logic(symbol const & s);
     bool has_logic() const { return m_logic != symbol::null; }
+    bool logic_is_dla() const { return m_logic == "DLA"; }
     symbol const & get_logic() const { return m_logic; }
     bool is_logic(char const * l_name) const { return has_logic() && strcmp(m_logic.bare_str(), l_name) == 0; }
     bool numeral_as_real() const { return m_numeral_as_real; }

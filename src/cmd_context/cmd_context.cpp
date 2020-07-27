@@ -650,33 +650,33 @@ void cmd_context::load_plugin(symbol const & name, bool install, svector<family_
 
 
 bool cmd_context::logic_has_arith() const {
-    return !has_logic() || smt_logics::logic_has_arith(m_logic);
+    return !has_logic() || logic_is_dla() || smt_logics::logic_has_arith(m_logic);
 }
 
 
 
 bool cmd_context::logic_has_bv() const {
-    return !has_logic() || smt_logics::logic_has_bv(m_logic);
+    return !has_logic() || logic_is_dla() || smt_logics::logic_has_bv(m_logic);
 }
 
 bool cmd_context::logic_has_seq() const {
-    return !has_logic() || smt_logics::logic_has_seq(m_logic);
+    return !has_logic() || logic_is_dla() || smt_logics::logic_has_seq(m_logic);
 }
 
 bool cmd_context::logic_has_pb() const {
-    return !has_logic() || smt_logics::logic_has_pb(m_logic);
+    return !has_logic() || logic_is_dla() || smt_logics::logic_has_pb(m_logic);
 }
 
 bool cmd_context::logic_has_fpa() const {
-    return !has_logic() || smt_logics::logic_has_fpa(m_logic);
+    return !has_logic() || logic_is_dla() || smt_logics::logic_has_fpa(m_logic);
 }
 
 bool cmd_context::logic_has_array() const {
-    return !has_logic() || smt_logics::logic_has_array(m_logic);
+    return !has_logic() || logic_is_dla() || smt_logics::logic_has_array(m_logic);
 }
 
 bool cmd_context::logic_has_datatype() const {
-    return !has_logic() || smt_logics::logic_has_datatype(m_logic);
+    return !has_logic() || logic_is_dla() || smt_logics::logic_has_datatype(m_logic);
 }
 
 bool cmd_context::logic_has_recfun() const { return true; }
@@ -697,9 +697,9 @@ void cmd_context::init_manager_core(bool new_manager) {
         register_plugin(symbol("seq"),      alloc(seq_decl_plugin), logic_has_seq());
         register_plugin(symbol("pb"),       alloc(pb_decl_plugin), logic_has_pb());
         register_plugin(symbol("fpa"),      alloc(fpa_decl_plugin), logic_has_fpa());
-        register_plugin(symbol("datalog_relation"), alloc(datalog::dl_decl_plugin), !has_logic());
+        register_plugin(symbol("datalog_relation"), alloc(datalog::dl_decl_plugin), !has_logic() || logic_is_dla());
         register_plugin(symbol("csp"),      alloc(csp_decl_plugin), smt_logics::logic_is_csp(m_logic));
-        register_plugin(symbol("specrels"), alloc(special_relations_decl_plugin), !has_logic());
+        register_plugin(symbol("specrels"), alloc(special_relations_decl_plugin), !has_logic() || logic_is_dla());
     }
     else {
         // the manager was created by an external module
@@ -820,6 +820,7 @@ void cmd_context::insert(symbol const & s, func_decl * f) {
         m_func_decls_stack.push_back(sf_pair(s, f));
     }
     TRACE("cmd_context", tout << "new function decl\n" << mk_pp(f, m()) << "\n";);
+    IF_VERBOSE(101, verbose_stream() << "func-decl AST: " << mk_pp(f, m()) << "\n";);
 }
 
 void cmd_context::insert(symbol const & s, psort_decl * p) {
@@ -848,6 +849,7 @@ void cmd_context::insert(symbol const & s, unsigned arity, sort *const* domain, 
         throw cmd_exception("invalid named expression, declaration already defined with this name ", s);
     }
     TRACE("insert_macro", tout << "new macro " << arity << "\n" << mk_pp(t, m()) << "\n";);
+    IF_VERBOSE(101, verbose_stream() << "new macro " << arity << "\n" << mk_pp(t, m()) << "\n";);
     insert_macro(s, arity, domain, t);
     if (!m_global_decls) {
         m_macros_stack.push_back(s);
@@ -913,6 +915,7 @@ recfun::promise_def cmd_context::decl_rec_fun(const symbol &name, unsigned int a
 void cmd_context::insert_rec_fun(func_decl* f, expr_ref_vector const& binding, svector<symbol> const& ids, expr* rhs) {
 
     TRACE("recfun", tout<< "define recfun " << f->get_name()  << " = " << mk_pp(rhs, m()) << "\n";);
+    IF_VERBOSE(101, verbose_stream() << "define recfun " << f->get_name()  << " = " << mk_pp(rhs, m()) << "\n";);
 
     recfun::decl::plugin& p = get_recfun_plugin();
 
@@ -1055,6 +1058,10 @@ void cmd_context::mk_app(symbol const & s, unsigned num_args, expr * const * arg
               tout << "s: " << s << "\n";
               tout << "body:\n" << mk_ismt2_pp(_t, m()) << "\n";
               tout << "args:\n"; for (unsigned i = 0; i < num_args; i++) tout << mk_ismt2_pp(args[i], m()) << "\n" << mk_pp(m().get_sort(args[i]), m()) << "\n";);
+        IF_VERBOSE(10, verbose_stream() << "well_sorted_check_enabled(): " << well_sorted_check_enabled() << "\n";
+              verbose_stream() << "s: " << s << "\n";
+              verbose_stream() << "body:\n" << mk_ismt2_pp(_t, m()) << "\n";
+              verbose_stream() << "args:\n"; for (unsigned i = 0; i < num_args; i++) verbose_stream() << mk_ismt2_pp(args[i], m()) << "\n" << mk_pp(m().get_sort(args[i]), m()) << "\n";);
         var_subst subst(m());
         scoped_rlimit no_limit(m().limit(), 0);
         result = subst(_t, coerced_args);
@@ -1330,6 +1337,7 @@ void cmd_context::assert_expr(expr * t) {
 }
 
 void cmd_context::assert_expr(symbol const & name, expr * t) {
+    IF_VERBOSE(101, verbose_stream() << "assert " << mk_pp(t, m()) << "\n";);
     if (!m_check_logic(t))
         throw cmd_exception(m_check_logic.get_last_error());
     if (!produce_unsat_cores() || name == symbol::null) {
@@ -1502,6 +1510,7 @@ void cmd_context::check_sat(unsigned num_assumptions, expr * const * assumptions
         return;
     IF_VERBOSE(100, verbose_stream() << "(started \"check-sat\")" << std::endl;);
     init_manager();
+    IF_VERBOSE(101, verbose_stream() << "check_sat AST:\n"; for (expr * e : m_assertions) verbose_stream() << "\n" << mk_pp(e, m()) << "\n";;verbose_stream() << "\n";);
     TRACE("before_check_sat", dump_assertions(tout););
     unsigned timeout = m_params.m_timeout;
     unsigned rlimit  = m_params.rlimit();
@@ -1543,6 +1552,7 @@ void cmd_context::check_sat(unsigned num_assumptions, expr * const * assumptions
         get_opt()->set_status(r);
     }
     else if (m_solver) {
+        IF_VERBOSE(10, verbose_stream() << "\t(call solver...)\n";);
         m_check_sat_result = m_solver.get(); // solver itself stores the result.
         m_solver->set_progress_callback(this);
         cancel_eh<reslimit> eh(m().limit());

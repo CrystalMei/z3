@@ -170,6 +170,7 @@ public:
     }
 
     lbool check_sat_core(unsigned sz, expr * const * assumptions) override {
+        IF_VERBOSE(10, verbose_stream() << "\t(inc_sat_solver check_sat_core)\n";);
         m_solver.pop_to_base_level();
         m_core.reset();
         if (m_solver.inconsistent()) return l_false;

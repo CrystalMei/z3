@@ -186,6 +186,7 @@ namespace {
         }
 
         lbool check_sat_core2(unsigned num_assumptions, expr * const * assumptions) override {
+            IF_VERBOSE(10, verbose_stream() << "\t(smt_solver check_sat_core)\n";);
             TRACE("solver_na2as", tout << "smt_solver::check_sat_core: " << num_assumptions << "\n";);
             return m_context.check(num_assumptions, assumptions);
         }
@@ -450,6 +451,7 @@ namespace {
 }
 
 solver * mk_smt_solver(ast_manager & m, params_ref const & p, symbol const & logic) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk SMT solver)\n";);
     return alloc(smt_solver, m, p, logic);
 }
 

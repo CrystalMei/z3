@@ -59,6 +59,7 @@ probe * mk_is_quasi_pb_probe() {
 
 // Create SMT solver that does not use cuts
 static tactic * mk_no_cut_smt_tactic(ast_manager& m, unsigned rs) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk no_cut_smt tactic)\n";);
     params_ref solver_p;
     solver_p.set_sym(symbol("smt.logic"), symbol("QF_LIA")); // force smt_setup to use the new solver
     solver_p.set_uint("arith.branch_cut_ratio", 10000000);
@@ -68,6 +69,7 @@ static tactic * mk_no_cut_smt_tactic(ast_manager& m, unsigned rs) {
 
 // Create SMT solver that does not use cuts
 static tactic * mk_no_cut_no_relevancy_smt_tactic(ast_manager& m, unsigned rs) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk no_cut_no_relevancy_smt tactic)\n";);
     params_ref solver_p;
     solver_p.set_uint("arith.branch_cut_ratio", 10000000);
     solver_p.set_uint("random_seed", rs);
@@ -76,6 +78,7 @@ static tactic * mk_no_cut_no_relevancy_smt_tactic(ast_manager& m, unsigned rs) {
 }
 
 static tactic * mk_bv2sat_tactic(ast_manager & m) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk bv2sat tactic)\n";);
     params_ref solver_p;
     // The cardinality constraint encoding generates a lot of shared if-then-else's that can be flattened.
     // Several of them are simplified to and/or. If we flat them, we increase a lot the memory consumption.
@@ -97,6 +100,7 @@ static tactic * mk_bv2sat_tactic(ast_manager & m) {
 #define SMALL_SIZE 80000
 
 static tactic * mk_pb_tactic(ast_manager & m) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk pb tactic)\n";);
     params_ref pb2bv_p;    
     pb2bv_p.set_uint("pb2bv_all_clauses_limit", 8);
 
@@ -119,6 +123,7 @@ static tactic * mk_pb_tactic(ast_manager & m) {
 
 
 static tactic * mk_lia2sat_tactic(ast_manager & m) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk lia2sat tactic)\n";);
     params_ref pb2bv_p;
     pb2bv_p.set_uint("pb2bv_all_clauses_limit", 8);
 
@@ -141,6 +146,7 @@ static tactic * mk_lia2sat_tactic(ast_manager & m) {
 // Try to find a model for an unbounded ILP problem.
 // Fails if the problem is no ILP.
 static tactic * mk_ilp_model_finder_tactic(ast_manager & m) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk ilp_model_finder tactic)\n";);
     params_ref add_bounds_p1;
     add_bounds_p1.set_rat("add_bound_lower", rational(-16));
     add_bounds_p1.set_rat("add_bound_upper", rational(15));
@@ -167,6 +173,7 @@ static tactic * mk_ilp_model_finder_tactic(ast_manager & m) {
 }
 
 static tactic * mk_bounded_tactic(ast_manager & m) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk bounded tactic)\n";);
     return annotate_tactic(
         "bounded-tactic",
         and_then(fail_if(mk_is_unbounded_probe()),
@@ -178,7 +185,8 @@ static tactic * mk_bounded_tactic(ast_manager & m) {
 }
 
 tactic * mk_preamble_tactic(ast_manager& m) {
-
+    IF_VERBOSE(10, verbose_stream() << "\t(mk preamble tactic)\n";);
+    // IF_VERBOSE(10, m.display(verbose_stream() << "PREAMBLE-TACTIC AST:\n"););
     params_ref pull_ite_p;
     pull_ite_p.set_bool("pull_cheap_ite", true);
     pull_ite_p.set_bool("push_ite_arith", false);
@@ -209,6 +217,7 @@ tactic * mk_preamble_tactic(ast_manager& m) {
 }
 
 tactic * mk_qflia_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF-LIA tactic)\n";);
     params_ref main_p;
     main_p.set_bool("elim_and", true);
     main_p.set_bool("som", true);

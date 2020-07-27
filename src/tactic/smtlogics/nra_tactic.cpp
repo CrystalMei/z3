@@ -28,6 +28,7 @@ Notes:
 #include "nlsat/tactic/qfnra_nlsat_tactic.h"
 
 tactic * mk_nra_tactic(ast_manager & m, params_ref const& p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk NRA tactic)\n";);
     params_ref p1 = p;
     p1.set_uint("seed", 11);
     p1.set_bool("factor", false);

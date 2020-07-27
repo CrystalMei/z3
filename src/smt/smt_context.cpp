@@ -3105,6 +3105,7 @@ namespace smt {
         if (m_asserted_formulas.inconsistent() && !inconsistent()) {
             asserted_inconsistent();
         }
+        IF_VERBOSE(100, verbose_stream() << "after internalize_assertions()...\n"; display(verbose_stream()); verbose_stream() << "\n"; );
         TRACE("internalize_assertions", tout << "after internalize_assertions()...\n";
               tout << "inconsistent: " << inconsistent() << "\n";);
         TRACE("after_internalize_assertions", display(tout););

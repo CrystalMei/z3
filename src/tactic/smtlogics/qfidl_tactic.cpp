@@ -36,6 +36,7 @@ Notes:
 #define BIG_PROBLEM 5000
 
 tactic * mk_qfidl_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF-IDL tactic)\n";);
     params_ref main_p;
     main_p.set_bool("elim_and", true);
     main_p.set_bool("blast_distinct", true);

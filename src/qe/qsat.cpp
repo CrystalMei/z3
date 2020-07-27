@@ -1488,14 +1488,17 @@ namespace qe {
 };
 
 tactic * mk_qsat_tactic(ast_manager& m, params_ref const& p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QSAT tactic)\n";);
     return alloc(qe::qsat, m, p, qe::qsat_sat);
 }
 
 tactic * mk_qe2_tactic(ast_manager& m, params_ref const& p) {   
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QE2 tactic)\n";);
     return alloc(qe::qsat, m, p, qe::qsat_qe);
 }
 
 tactic * mk_qe_rec_tactic(ast_manager& m, params_ref const& p) {   
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QE_REC tactic)\n";);
     return alloc(qe::qsat, m, p, qe::qsat_qe_rec);
 }
 

@@ -28,6 +28,7 @@ void theory_array_params::updt_params(params_ref const & _p) {
 #define DISPLAY_PARAM(X) out << #X"=" << X << std::endl;
 
 void theory_array_params::display(std::ostream & out) const {
+    IF_VERBOSE(10, verbose_stream() << "Theory Array_Params Display\n"; );
     DISPLAY_PARAM(m_array_mode);
     DISPLAY_PARAM(m_array_weak);
     DISPLAY_PARAM(m_array_extensional);

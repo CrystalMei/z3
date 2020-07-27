@@ -79,6 +79,7 @@ probe * mk_is_fp_qfnra_probe() {
 
 
 tactic * mk_qffp_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_FP tactic)\n";);
     params_ref simp_p = p;
     simp_p.set_bool("arith_lhs", true);
     simp_p.set_bool("elim_and", true);

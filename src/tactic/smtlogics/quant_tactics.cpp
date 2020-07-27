@@ -30,6 +30,7 @@ Revision History:
 #include "tactic/arith/probe_arith.h"
 
 static tactic * mk_quant_preprocessor(ast_manager & m, bool disable_gaussian = false) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk quant preprocessor)\n";);
     params_ref pull_ite_p;
     pull_ite_p.set_bool("pull_cheap_ite", true);
     pull_ite_p.set_bool("local_ctx", true);
@@ -62,6 +63,7 @@ static tactic * mk_no_solve_eq_preprocessor(ast_manager & m) {
 }
 
 tactic * mk_ufnia_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk UFNIA tactic)\n";);
     tactic * st = and_then(mk_no_solve_eq_preprocessor(m),
                            mk_qe_lite_tactic(m, p),
                            mk_smt_tactic(m));
@@ -70,6 +72,7 @@ tactic * mk_ufnia_tactic(ast_manager & m, params_ref const & p) {
 }
 
 tactic * mk_uflra_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk UFLRA tactic)\n";);
     tactic * st = and_then(mk_quant_preprocessor(m),
                            mk_smt_tactic(m));
     st->updt_params(p);
@@ -77,6 +80,7 @@ tactic * mk_uflra_tactic(ast_manager & m, params_ref const & p) {
 }
 
 tactic * mk_auflia_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk AUFLIA tactic)\n";);
     params_ref qi_p;
     qi_p.set_str("qi.cost", "0");
     TRACE("qi_cost", qi_p.display(tout); tout << "\n" << qi_p.get_str("qi.cost", "<null>") << "\n";);
@@ -90,6 +94,7 @@ tactic * mk_auflia_tactic(ast_manager & m, params_ref const & p) {
 }
 
 tactic * mk_auflira_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk AUFLIRA tactic)\n";);
     tactic * st = and_then(mk_quant_preprocessor(m),
                            mk_smt_tactic(m));
     st->updt_params(p);
@@ -97,6 +102,7 @@ tactic * mk_auflira_tactic(ast_manager & m, params_ref const & p) {
 }
 
 tactic * mk_aufnira_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk AUFNIRA tactic)\n";);
     tactic * st = and_then(mk_quant_preprocessor(m),
                            mk_smt_tactic(m));
     st->updt_params(p);
@@ -104,6 +110,7 @@ tactic * mk_aufnira_tactic(ast_manager & m, params_ref const & p) {
 }
 
 tactic * mk_lra_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk LRA tactic)\n";);
     tactic * st = and_then(mk_quant_preprocessor(m),
                            mk_qe_lite_tactic(m, p),
                            cond(mk_has_quantifier_probe(), 
@@ -117,10 +124,12 @@ tactic * mk_lra_tactic(ast_manager & m, params_ref const & p) {
 }
 
 tactic * mk_lia_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk LIA tactic)\n";);
     return mk_lra_tactic(m, p);
 }
 
 tactic * mk_lira_tactic(ast_manager & m, params_ref const & p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk LIRA tactic)\n";);
     return mk_lra_tactic(m, p);
 }
 

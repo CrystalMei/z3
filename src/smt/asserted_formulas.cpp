@@ -238,6 +238,7 @@ bool asserted_formulas::check_well_sorted() const {
 }
 
 void asserted_formulas::reduce() {
+    IF_VERBOSE(10, verbose_stream() << "(smt.simplifier-start)\n";);
     if (inconsistent())
         return;
     if (canceled())
@@ -249,6 +250,9 @@ void asserted_formulas::reduce() {
     if (m_macro_manager.has_macros())
         invoke(m_find_macros);
 
+    IF_VERBOSE(101, verbose_stream() << "\nbefore reduce\n";);
+    IF_VERBOSE(101, display(verbose_stream()););
+    IF_VERBOSE(101, verbose_stream() << "\n";);
     TRACE("before_reduce", display(tout););
     CASSERT("well_sorted", check_well_sorted());
 
@@ -275,7 +279,10 @@ void asserted_formulas::reduce() {
     if (!invoke(m_flatten_clauses)) return;
 //    if (!invoke(m_propagate_values)) return;
 
-    IF_VERBOSE(10, verbose_stream() << "(smt.simplifier-done)\n";);
+    IF_VERBOSE(100, verbose_stream() << "(smt.simplifier-done)\n";);
+    IF_VERBOSE(101, verbose_stream() << "\nafter reduce\n";);
+    IF_VERBOSE(101, display(verbose_stream()););
+    IF_VERBOSE(101, verbose_stream() << "\n";);
     TRACE("after_reduce", display(tout););
     TRACE("after_reduce_ll", ast_mark visited; display_ll(tout, visited););
     TRACE("macros", m_macro_manager.display(tout););

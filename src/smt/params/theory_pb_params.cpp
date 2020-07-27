@@ -28,6 +28,7 @@ void theory_pb_params::updt_params(params_ref const & _p) {
 #define DISPLAY_PARAM(X) out << #X"=" << X << std::endl;
 
 void theory_pb_params::display(std::ostream & out) const {
+    IF_VERBOSE(10, verbose_stream() << "Theory PB_Params Display\n"; );
     DISPLAY_PARAM(m_pb_conflict_frequency);
     DISPLAY_PARAM(m_pb_learn_complements);
 }

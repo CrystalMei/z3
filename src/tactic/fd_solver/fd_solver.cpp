@@ -28,6 +28,7 @@ Notes:
 #include "solver/parallel_params.hpp"
 
 solver * mk_fd_solver(ast_manager & m, params_ref const & p, bool incremental_mode) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk FD tactic)\n";);
     solver* s = mk_inc_sat_solver(m, p, incremental_mode);
     s = mk_enum2bv_solver(m, p, s);
     s = mk_pb2bv_solver(m, p, s);
@@ -45,6 +46,7 @@ tactic * mk_parallel_qffd_tactic(ast_manager& m, params_ref const& p) {
 
 
 tactic * mk_fd_tactic(ast_manager & m, params_ref const& _p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk FD tactic)\n";);
     parallel_params pp(_p);
     params_ref p = _p;
     return pp.enable() ? mk_parallel_qffd_tactic(m, p) : mk_seq_fd_tactic(m, p);

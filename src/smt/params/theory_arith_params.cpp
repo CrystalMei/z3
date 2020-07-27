@@ -48,6 +48,7 @@ void theory_arith_params::updt_params(params_ref const & _p) {
 #define DISPLAY_PARAM(X) out << #X"=" << X << std::endl;
 
 void theory_arith_params::display(std::ostream & out) const {
+    IF_VERBOSE(10, verbose_stream() << "Theory Arith_Params Display\n"; );
     DISPLAY_PARAM(m_arith_eq2ineq);
     DISPLAY_PARAM(m_arith_process_all_eqs);
     DISPLAY_PARAM(m_arith_mode);

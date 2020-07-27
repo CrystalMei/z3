@@ -47,6 +47,7 @@ struct check_logic::imp {
     bool          m_nonlinear; // true if the logic supports nonlinear arithmetic
     bool          m_bvs;       // true if the logic supports bit-vectors
     bool          m_quantifiers; // true if the logic supports quantifiers
+    bool          m_diffarith; // true if the logic supports difference logic + incomplete linear arith
     bool          m_unknown_logic;
 
     imp(ast_manager & _m):m(_m), m_a_util(m), m_bv_util(m), m_ar_util(m), m_seq_util(m), m_dt_util(m), m_pb_util(m) {

@@ -77,6 +77,7 @@ void smt_params::updt_params(context_params const & p) {
 #define DISPLAY_PARAM(X) out << #X"=" << X << std::endl;
 
 void smt_params::display(std::ostream & out) const {
+    IF_VERBOSE(10, verbose_stream() << "SMT_Params Display\n"; );
     preprocessor_params::display(out);
     dyn_ack_params::display(out);
     qi_params::display(out);

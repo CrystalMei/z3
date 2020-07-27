@@ -24,6 +24,7 @@ Notes:
 #include "nlsat/tactic/qfnra_nlsat_tactic.h"
 
 static tactic * mk_qfnra_sat_solver(ast_manager& m, params_ref const& p, unsigned bv_size) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_NRA SAT solver)\n";);
     params_ref nra2sat_p = p;
     nra2sat_p.set_uint("nla2bv_max_bv_size", p.get_uint("nla2bv_max_bv_size", bv_size));   
     
@@ -33,6 +34,7 @@ static tactic * mk_qfnra_sat_solver(ast_manager& m, params_ref const& p, unsigne
 }
 
 tactic * mk_qfnra_tactic(ast_manager & m, params_ref const& p) {
+    IF_VERBOSE(10, verbose_stream() << "\t(mk QF_NRA tactic)\n";);
     params_ref p0 = p;
     p0.set_bool("inline_vars", true);
     params_ref p1 = p;    

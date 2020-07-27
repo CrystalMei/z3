@@ -790,6 +790,10 @@ namespace smt {
         if (m_logic == "QF_LIA") {
             mode = AS_NEW_ARITH;
         }
+        if (m_logic == "DLA") { // set arith to be diff logic arith
+            IF_VERBOSE(10, verbose_stream() << "\t(setup arith to Diff Logic)\n";);
+            mode = AS_DENSE_DIFF_LOGIC; // need dense diff logic
+        }
         switch(mode) {
         case AS_NO_ARITH:
             m_context.register_plugin(alloc(smt::theory_dummy, m_context, m_manager.mk_family_id("arith"), "no arithmetic"));
@@ -947,6 +951,7 @@ namespace smt {
     }
 
     void setup::setup_unknown() {
+        IF_VERBOSE(10, verbose_stream() << "\t(unknown logic setup)\n";);
         static_features st(m_manager);
         ptr_vector<expr> fmls;
         m_context.get_asserted_formulas(fmls);
