@@ -103,6 +103,7 @@ tactic * mk_tactic_for_logic(ast_manager & m, params_ref const & p, symbol const
     else if ((logic == "QF_FD" || logic == "SAT") && !m.proofs_enabled())
         return mk_fd_tactic(m, p);
     else if (logic == "DLA")
+        // return mk_default_tactic(m, p);
         return mk_dla_tactic(m, p);
     else
         return mk_default_tactic(m, p);

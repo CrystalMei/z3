@@ -133,6 +133,8 @@ namespace smt {
             setup_QF_S();
         else if (m_logic == "QF_DT")
             setup_QF_DT();
+        else if (m_logic == "DLA")
+            setup_DLA();
         else
             setup_unknown();
     }
@@ -205,6 +207,8 @@ namespace smt {
                 setup_LRA();
             else if (m_logic == "CSP")
                 setup_CSP();
+            else if (m_logic == "DLA")
+                setup_DLA();
             else 
                 setup_unknown(st);
         }
@@ -755,10 +759,12 @@ namespace smt {
     }
 
     void setup::setup_lra_arith() {
-        if (m_params.m_arith_mode == AS_OLD_ARITH)
-            m_context.register_plugin(alloc(smt::theory_mi_arith, m_context));
-        else
-            m_context.register_plugin(alloc(smt::theory_lra, m_context));
+        if (m_params.m_arith_mode == AS_OLD_ARITH) {
+            IF_VERBOSE(10, verbose_stream() << "\t(setup LRA arith: Old Arith - theory_mi_arith)\n";);
+            m_context.register_plugin(alloc(smt::theory_mi_arith, m_context)); }
+        else {
+            IF_VERBOSE(10, verbose_stream() << "\t(setup LRA arith: Not Old Arith - theory_lra)\n";);
+            m_context.register_plugin(alloc(smt::theory_lra, m_context)); }
     }
 
     void setup::setup_mi_arith() {
@@ -774,8 +780,6 @@ namespace smt {
             break;
         }
     }
-
-
 
     void setup::setup_arith() {
         static_features    st(m_manager);
@@ -796,39 +800,51 @@ namespace smt {
         }
         switch(mode) {
         case AS_NO_ARITH:
+            IF_VERBOSE(10, verbose_stream() << "\t(setup arith: No Arith - theory_dummy)\n";);
             m_context.register_plugin(alloc(smt::theory_dummy, m_context, m_manager.mk_family_id("arith"), "no arithmetic"));
             break;
         case AS_DIFF_LOGIC:
+            IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Diff Logic)\n";);
             m_params.m_arith_eq2ineq  = true;
             if (fixnum) {
-                if (int_only)
-                    m_context.register_plugin(alloc(smt::theory_fidl, m_context));
-                else
-                    m_context.register_plugin(alloc(smt::theory_frdl, m_context));
+                if (int_only) {
+                    IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Diff Logic - theory_fidl)\n";);
+                    m_context.register_plugin(alloc(smt::theory_fidl, m_context)); }
+                else {
+                    IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Diff Logic - theory_frdl)\n";);
+                    m_context.register_plugin(alloc(smt::theory_frdl, m_context)); }
             }
             else {
-                if (int_only)
-                    m_context.register_plugin(alloc(smt::theory_idl, m_context));
-                else
-                    m_context.register_plugin(alloc(smt::theory_rdl, m_context));
+                if (int_only) {
+                    IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Diff Logic - theory_idl)\n";);
+                    m_context.register_plugin(alloc(smt::theory_idl, m_context)); }
+                else {
+                    IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Diff Logic - theory_rdl)\n";);
+                    m_context.register_plugin(alloc(smt::theory_rdl, m_context)); }
     }
             break;
         case AS_DENSE_DIFF_LOGIC:
+            IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Dense Diff Logic)\n";);
             m_params.m_arith_eq2ineq  = true;
             if (fixnum) {
-                if (int_only)
-                    m_context.register_plugin(alloc(smt::theory_dense_si, m_context));
-                else
-                    m_context.register_plugin(alloc(smt::theory_dense_smi, m_context));
+                if (int_only) {
+                    IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Dense Diff Logic - theory_dense_si)\n";);
+                    m_context.register_plugin(alloc(smt::theory_dense_si, m_context)); }
+                else {
+                    IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Dense Diff Logic - theory_dense_smi)\n";);
+                    m_context.register_plugin(alloc(smt::theory_dense_smi, m_context)); }
             }
             else {
-                if (int_only)
-                    m_context.register_plugin(alloc(smt::theory_dense_i, m_context));
-                else
-                    m_context.register_plugin(alloc(smt::theory_dense_mi, m_context));
+                if (int_only) {
+                    IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Dense Diff Logic - theory_dense_i)\n";);
+                    m_context.register_plugin(alloc(smt::theory_dense_i, m_context)); }
+                else {
+                    IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Dense Diff Logic - theory_dense_mi)\n";);
+                    m_context.register_plugin(alloc(smt::theory_dense_mi, m_context)); }
             }
             break;
         case AS_UTVPI:
+            IF_VERBOSE(10, verbose_stream() << "\t(setup arith: UTVPI)\n";);
             m_params.m_arith_eq2ineq  = true;
             if (int_only)
                 m_context.register_plugin(alloc(smt::theory_iutvpi, m_context));
@@ -836,18 +852,24 @@ namespace smt {
                 m_context.register_plugin(alloc(smt::theory_rutvpi, m_context));
             break;
         case AS_OPTINF:
+            IF_VERBOSE(10, verbose_stream() << "\t(setup arith: OPTINF)\n";);
             m_context.register_plugin(alloc(smt::theory_inf_arith, m_context));            
             break;
         case AS_OLD_ARITH:
-            if (m_params.m_arith_int_only && int_only)
-                m_context.register_plugin(alloc(smt::theory_i_arith, m_context));
-            else
-                m_context.register_plugin(alloc(smt::theory_mi_arith, m_context));
+            IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Old Arith)\n";);
+            if (m_params.m_arith_int_only && int_only) {
+                IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Old Arith - theory_i_arith)\n";);
+                m_context.register_plugin(alloc(smt::theory_i_arith, m_context)); }
+            else {
+                IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Old Arith - theory_i_arith)\n";);
+                m_context.register_plugin(alloc(smt::theory_mi_arith, m_context)); }
             break;
         case AS_NEW_ARITH:
+            IF_VERBOSE(10, verbose_stream() << "\t(setup arith: New Arith)\n";);
             setup_lra_arith();
             break;
         default:
+            IF_VERBOSE(10, verbose_stream() << "\t(setup arith: default - theory_mi_arith)\n";);
             m_context.register_plugin(alloc(smt::theory_mi_arith, m_context));
             break;
         }
@@ -948,6 +970,10 @@ namespace smt {
 
     void setup::setup_special_relations() {
         m_context.register_plugin(alloc(smt::theory_special_relations, m_context, m_manager));
+    }
+
+    void setup::setup_DLA() {
+        IF_VERBOSE(10, verbose_stream() << "\t(DLA logic setup)\n";);setup_unknown ();
     }
 
     void setup::setup_unknown() {
