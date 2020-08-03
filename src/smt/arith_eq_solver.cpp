@@ -329,6 +329,7 @@ bool arith_eq_solver::solve_integer_equations(
     row&         unsat_row
     )
 {
+    IF_VERBOSE(10, verbose_stream() << "\tarith_eq_solver: solve_integer_equations\n";);
     // return solve_integer_equations_units(rows, unsat_row);
     return solve_integer_equations_gcd(rows, unsat_row);
 }

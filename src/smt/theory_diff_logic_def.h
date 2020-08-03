@@ -178,6 +178,7 @@ void theory_diff_logic<Ext>::found_non_diff_logic_expr(expr * n) {
 
 template<typename Ext>
 bool theory_diff_logic<Ext>::internalize_atom(app * n, bool gate_ctx) {
+    IF_VERBOSE(5, verbose_stream() << "DL: internalize_atom: " << mk_pp(n, m) << "\n";);
     if (!m_consistent)
         return false;
     if (!m_util.is_le(n) && !m_util.is_ge(n)) {
@@ -192,7 +193,9 @@ bool theory_diff_logic<Ext>::internalize_atom(app * n, bool gate_ctx) {
     rational kr;
     theory_var source, target; // target - source <= k
     app * lhs = to_app(n->get_arg(0));
+    IF_VERBOSE(5, verbose_stream() << "DL: internalize_atom: LHS = " << mk_pp(lhs, m) << "\n";);
     app * rhs = to_app(n->get_arg(1));
+    IF_VERBOSE(5, verbose_stream() << "DL: internalize_atom: RHS = " << mk_pp(rhs, m) << "\n";);
     if (!m_util.is_numeral(rhs)) {
         std::swap(rhs, lhs);
         is_ge = !is_ge;
@@ -277,6 +280,7 @@ bool theory_diff_logic<Ext>::internalize_atom(app * n, bool gate_ctx) {
     m_atoms.push_back(a);
     m_bool_var2atom.insert(bv, a);
 
+    IF_VERBOSE(5, verbose_stream() << "DL: internalize_atom done: " << mk_pp(n, m) << "\n"; m_graph.display_edge(verbose_stream() << "pos: ", pos); m_graph.display_edge(verbose_stream() << "neg: ", neg); );
     TRACE("arith", 
           tout << mk_pp(n, m) << "\n";
           m_graph.display_edge(tout << "pos: ", pos); 
@@ -578,6 +582,7 @@ void theory_diff_logic<Ext>::propagate_core() {
 
 template<typename Ext>
 bool theory_diff_logic<Ext>::propagate_atom(atom* a) {
+    IF_VERBOSE(5, verbose_stream() << "DL: propagate atom: atom = "; a->display(*this, verbose_stream()); verbose_stream() << "\n";);
     TRACE("arith", a->display(*this, tout); tout << "\n";);
     if (ctx.inconsistent()) {
         return false;
@@ -818,6 +823,7 @@ theory_var theory_diff_logic<Ext>::mk_num(app* n, rational const& r) {
 template<typename Ext>
 theory_var theory_diff_logic<Ext>::mk_var(enode* n) {
     theory_var v = theory::mk_var(n);
+    IF_VERBOSE(5, verbose_stream() << "DL: enode mk_var: " << v << "\n";);
     TRACE("diff_logic_vars", tout << "mk_var: " << v << "\n";);
     m_graph.init_var(v);
     ctx.attach_th_var(n, this, v);
@@ -846,6 +852,7 @@ void theory_diff_logic<Ext>::set_sort(expr* n) {
 
 template<typename Ext>
 theory_var theory_diff_logic<Ext>::mk_var(app* n) {
+    IF_VERBOSE(5, verbose_stream() << "DL: mk_var starts: " << mk_pp(n, m) << "\n";);
     enode* e = nullptr;
     theory_var v = null_theory_var;
     if (!ctx.e_internalized(n)) {
@@ -861,6 +868,7 @@ theory_var theory_diff_logic<Ext>::mk_var(app* n) {
         TRACE("non_diff_logic", tout << "Variable should not be interpreted\n";);
         found_non_diff_logic_expr(n);
     }
+    IF_VERBOSE(5, verbose_stream() << "DL: mk_var returns: " << mk_pp(n, m) << " |-> " << v << "\n";);
     TRACE("arith", tout << mk_pp(n, m) << " |-> " << v << "\n";);
     return v;
 }

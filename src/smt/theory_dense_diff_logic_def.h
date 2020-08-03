@@ -51,6 +51,7 @@ namespace smt {
     template<typename Ext>
     theory_var theory_dense_diff_logic<Ext>::mk_var(enode * n) {
         theory_var v = theory::mk_var(n);
+        IF_VERBOSE(5, verbose_stream() << "DDL: enode mk_var: " << v << "\n";);
         bool is_int  = m_autil.is_int(n->get_owner());
         m_is_int.push_back(is_int);
         m_f_targets.push_back(f_target());
@@ -71,6 +72,7 @@ namespace smt {
 
     template<typename Ext>
     theory_var theory_dense_diff_logic<Ext>::internalize_term_core(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "DDL: internalize_term_core:\n" << mk_pp(n, m) << "\n";);
         if (ctx.e_internalized(n)) {
             enode * e    = ctx.get_enode(n);
             if (is_attached_to_var(e))
@@ -132,6 +134,7 @@ namespace smt {
                           
     template<typename Ext>
     bool theory_dense_diff_logic<Ext>::internalize_atom(app * n, bool gate_ctx) {
+        IF_VERBOSE(5, verbose_stream() << "DDL: internalize_atom: " << mk_pp(n, m) << "\n";);
         if (memory::above_high_watermark()) {
             found_non_diff_logic_expr(n); // little hack... TODO: change to no_memory and return l_undef if SAT
             return false;
@@ -142,7 +145,9 @@ namespace smt {
         theory_var source, target;
         SASSERT(m_autil.is_le(n) || m_autil.is_ge(n));
         app * lhs      = to_app(n->get_arg(0));
+        IF_VERBOSE(5, verbose_stream() << "DDL: internalize_atom: LHS = " << mk_pp(lhs, m) << "\n";);
         app * rhs      = to_app(n->get_arg(1));
+        IF_VERBOSE(5, verbose_stream() << "DDL: internalize_atom: RHS = " << mk_pp(rhs, m) << "\n";);
         if (!m_autil.is_numeral(rhs)) {
             found_non_diff_logic_expr(n);
             return false;
@@ -171,6 +176,8 @@ namespace smt {
             found_non_diff_logic_expr(n);
             return false;
         }
+        IF_VERBOSE(5, verbose_stream() << "DDL: internalize_atom: s = " << mk_pp(s, m) << ", " << expr_ref(s, m) << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "DDL: internalize_atom: t = " << mk_pp(t, m) << ", " << expr_ref(t, m) << "\n";);
         TRACE("arith", tout << expr_ref(lhs, m) << " " << expr_ref(s, m) << " " << expr_ref(t, m) << "\n";);
         source = internalize_term_core(s);
         target = internalize_term_core(t);
@@ -207,7 +214,8 @@ namespace smt {
     }
 
     template<typename Ext>
-    bool theory_dense_diff_logic<Ext>::internalize_term(app * term) {        
+    bool theory_dense_diff_logic<Ext>::internalize_term(app * term) {   
+        IF_VERBOSE(5, verbose_stream() << "DDL: internalize_term:\n" << mk_pp(term, m) << "\n";);     
         if (memory::above_high_watermark()) {
             found_non_diff_logic_expr(term); // little hack... TODO: change to no_memory and return l_undef if SAT
             return false;
@@ -222,6 +230,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_dense_diff_logic<Ext>::internalize_eq_eh(app * atom, bool_var v) {
+        IF_VERBOSE(5, verbose_stream() << "DDL: internalize_eq_eh:\n" << mk_pp(atom, m) << "\n";);
         TRACE("ddl", tout << "eq-eh: " << mk_pp(atom, m) << "\n";);
         if (memory::above_high_watermark())
             return;
@@ -467,6 +476,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_dense_diff_logic<Ext>::update_cells() {
+        IF_VERBOSE(5, verbose_stream() << "\tDDL: update_cells\n";);
         edge_id new_edge_id = m_edges.size() - 1;
         edge & last         = m_edges.back();
         theory_var s        = last.m_source;
@@ -580,6 +590,7 @@ namespace smt {
 
     template<typename Ext>
     inline void theory_dense_diff_logic<Ext>::add_edge(theory_var source, theory_var target, numeral const & offset, literal l) {
+        IF_VERBOSE(5, verbose_stream() << "\tDenseDL: add_edge\n";);
         TRACE("ddl", tout << "trying adding edge: #" << get_enode(source)->get_owner_id() << " -- " << offset << " --> #" << get_enode(target)->get_owner_id() << "\n";);
         cell & c_inv = m_matrix[target][source];
         if (c_inv.m_edge_id != null_edge_id && - c_inv.m_distance > offset) {
@@ -835,6 +846,7 @@ namespace smt {
     template<typename Ext>
     model_value_proc * theory_dense_diff_logic<Ext>::mk_value(enode * n, model_generator & mg) {
         theory_var v = n->get_th_var(get_id());
+        IF_VERBOSE(5, verbose_stream() << "DDL: enode mk_value: " << v << "\n";);
         SASSERT(v != null_theory_var);
         if (v >= (int)m_assignment.size())
             return alloc(expr_wrapper_proc, m_factory->mk_num_value(rational::zero(), is_int(v)));
@@ -846,6 +858,7 @@ namespace smt {
     // TBD: code is common to both sparse and dense difference logic solvers.
     template<typename Ext>
     bool theory_dense_diff_logic<Ext>::internalize_objective(expr * n, rational const& m, rational& q, objective_term & objective) {
+        IF_VERBOSE(5, verbose_stream() << "DDL: internalize_objective\n";);
 
         // Compile term into objective_term format
         rational r;

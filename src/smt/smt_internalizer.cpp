@@ -224,6 +224,7 @@ namespace smt {
        \remark pr is 0 if proofs are disabled.
     */
     void context::internalize_assertion(expr * n, proof * pr, unsigned generation) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         TRACE("internalize_assertion", tout << mk_pp(n, m) << "\n";); 
         TRACE("internalize_assertion_ll", tout << mk_ll_pp(n, m) << "\n";); 
         TRACE("generation", tout << "generation: " << m_generation << "\n";);
@@ -293,6 +294,7 @@ namespace smt {
     }
 
     void context::assert_default(expr * n, proof * pr) {
+        IF_VERBOSE(5, verbose_stream() << "assert_default: expr = " << mk_pp(n, m) << ", its ID: " << n->get_id() << "\n";);
         internalize(n, true);
         literal l = get_literal(n);
         if (l == false_literal) {
@@ -361,6 +363,7 @@ namespace smt {
     }
 
     void context::internalize_rec(expr * n, bool gate_ctx) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_rec:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         TRACE("internalize", tout << "internalizing:\n" << mk_pp(n, m) << "\n";);
         TRACE("internalize_bug", tout << "internalizing:\n" << mk_bounded_pp(n, m) << "\n";);
         if (is_var(n)) {
@@ -384,6 +387,7 @@ namespace smt {
        \brief Internalize the given formula into the logical context.
     */
     void context::internalize_formula(expr * n, bool gate_ctx) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_formula:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         TRACE("internalize_bug", tout << "internalize formula: #" << n->get_id() << ", gate_ctx: " << gate_ctx << "\n" << mk_pp(n, m) << "\n";);
         SASSERT(m.is_bool(n));
         if (m.is_true(n) || m.is_false(n))
@@ -441,6 +445,7 @@ namespace smt {
        \brief Internalize an equality.
     */
     void context::internalize_eq(app * n, bool gate_ctx) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_eq:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!b_internalized(n));
         SASSERT(m.is_eq(n));
         internalize_formula_core(n, gate_ctx);
@@ -487,6 +492,7 @@ namespace smt {
         that can internalize n.
     */
     bool context::internalize_theory_atom(app * n, bool gate_ctx) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_theory_atom:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!b_internalized(n));
         theory * th  = m_theories.get_plugin(n->get_family_id());
         TRACE("datatype_bug", tout << "internalizing theory atom:\n" << mk_pp(n, m) << "\n";);
@@ -896,6 +902,8 @@ namespace smt {
         //SASSERT(!m.is_not(n));
         unsigned id = n->get_id();
         bool_var v  = m_b_internalized_stack.size();
+        IF_VERBOSE(5, verbose_stream() << "mk_bool_var: creating boolean variable: " << v << " for: " << mk_pp(n, m) << ", its ID: " << n->get_id() << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "mk_bool_var: mk_var_bug - mk_bool: " << v << "\n";);      
         TRACE("mk_bool_var", tout << "creating boolean variable: " << v << " for:\n" << mk_pp(n, m) << " " << n->get_id() << "\n";);
         TRACE("mk_var_bug", tout << "mk_bool: " << v << "\n";);                
         set_bool_var(id, v);

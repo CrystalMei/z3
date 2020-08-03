@@ -494,7 +494,7 @@ namespace smt {
     }
 
     void setup::setup_QF_LIA() {
-        TRACE("setup", tout << "setup_QF_LIA(st)\n";);
+        TRACE("setup", tout << "setup_QF_LIA()\n";);
         m_params.m_relevancy_lvl       = 0;
         m_params.m_arith_eq2ineq       = true;
         m_params.m_arith_reflect       = false; 
@@ -969,6 +969,7 @@ namespace smt {
     }
 
     void setup::setup_special_relations() {
+        IF_VERBOSE(1, verbose_stream() << "\t(special_relations setup)\n";);
         m_context.register_plugin(alloc(smt::theory_special_relations, m_context, m_manager));
     }
 

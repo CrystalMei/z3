@@ -4304,6 +4304,7 @@ namespace smt {
         expr * _lhs = lhs->get_owner();
         expr * _rhs = rhs->get_owner();
         expr * eq = mk_eq_atom(_lhs, _rhs);
+        IF_VERBOSE(5, verbose_stream() << "assume_eq:\n" << mk_pp(eq, m) << "\n";);
         TRACE("assume_eq", tout << "creating interface eq:\n" << mk_pp(eq, m) << "\n";);
         if (m.is_false(eq)) {
             return false;
