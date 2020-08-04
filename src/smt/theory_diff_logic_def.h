@@ -52,7 +52,8 @@ theory_diff_logic<Ext>::theory_diff_logic(context& ctx):
     m_factory(nullptr),
     m_nc_functor(*this),
     m_S(ctx.get_manager().limit()),
-    m_num_simplex_edges(0) {
+    m_num_simplex_edges(0),
+    m_var_value_table(DEFAULT_HASHTABLE_INITIAL_CAPACITY, var_value_hash(*this), var_value_eq(*this)) {
 }            
 
 template<typename Ext>
@@ -383,7 +384,8 @@ final_check_status theory_diff_logic<Ext>::final_check_eh() {
     if (!is_consistent())
         return FC_CONTINUE;
     SASSERT(is_consistent());
-    // if (assume_eqs(m_var_value_table)) return FC_CONTINUE;
+    if (assume_eqs(m_var_value_table))
+        return FC_CONTINUE;
     if (m_non_diff_logic_exprs) {
         return FC_GIVEUP; 
     }

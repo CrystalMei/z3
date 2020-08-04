@@ -204,6 +204,25 @@ namespace smt {
         Simplex                        m_S;
         unsigned                       m_num_simplex_edges;
 
+        struct var_value_hash;
+        friend struct var_value_hash;
+        struct var_value_hash {
+            theory_diff_logic & m_th;
+            var_value_hash(theory_diff_logic & th):m_th(th) {}
+            unsigned operator()(theory_var v) const { return m_th.m_graph.get_assignment(v).hash(); }
+        };
+
+        struct var_value_eq;
+        friend struct var_value_eq;
+        struct var_value_eq {
+            theory_diff_logic & m_th;
+            var_value_eq(theory_diff_logic & th):m_th(th) {}
+            bool operator()(theory_var v1, theory_var v2) const { return m_th.m_graph.get_assignment(v1) == m_th.m_graph.get_assignment(v2); }
+        };
+
+        typedef int_hashtable<var_value_hash, var_value_eq> var_value_table;
+        var_value_table             m_var_value_table;
+
         // Set a conflict due to a negative cycle.
         void set_neg_cycle_conflict();
                
