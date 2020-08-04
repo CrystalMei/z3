@@ -81,6 +81,10 @@ namespace smt {
         return r;
     }
 
+    void context::display_asserted_formulas_abs(std::ostream & out) const {
+        m_asserted_formulas.display(out);
+    }
+
     void context::display_asserted_formulas(std::ostream & out) const {
         m_asserted_formulas.display_ll(out, get_pp_visited());
     }

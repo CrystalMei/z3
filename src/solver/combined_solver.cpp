@@ -202,9 +202,6 @@ public:
     }
 
     lbool check_sat_core(unsigned num_assumptions, expr * const * assumptions) override {
-        // IF_VERBOSE(101, verbose_stream() << "\ncombined solver check_sat\n";);
-        // IF_VERBOSE(101, solver::display(verbose_stream()););
-        // IF_VERBOSE(101, verbose_stream() << "\n";);
         m_check_sat_executed  = true;        
         m_use_solver1_results = false;
 
@@ -213,15 +210,15 @@ public:
             m_ignore_solver1)  {
             // must use incremental solver
             switch_inc_mode();
+            // IF_VERBOSE(5, verbose_stream() << "combined_solver 2 - check_sat_core:\n"; m_solver2->display(verbose_stream()););
             return m_solver2->check_sat_core(num_assumptions, assumptions);
         }
         
         if (m_inc_mode) {
             if (m_inc_timeout == UINT_MAX) {
-                IF_VERBOSE(PS_VB_LVL, verbose_stream() << "(combined-solver \"using solver 2 (without a timeout)\")\n";);  
-                // IF_VERBOSE(101, verbose_stream() << "\nbefore solver2 check_sat\n";);
-                // IF_VERBOSE(101, solver::display(verbose_stream()););
-                // IF_VERBOSE(101, verbose_stream() << "\n";);          
+                IF_VERBOSE(PS_VB_LVL, verbose_stream() << "(combined-solver \"using solver 2 (without a timeout)\")\n";);
+                // IF_VERBOSE(5, verbose_stream() << "combined_solver 2 - check_sat_core:\n"; m_solver2->display(verbose_stream()););
+                // IF_VERBOSE(5, verbose_stream() << "combined_solver 1 - check_sat_core:\n"; m_solver1->display(verbose_stream()););
                 lbool r = m_solver2->check_sat_core(num_assumptions, assumptions);
                 if (r != l_undef || !use_solver1_when_undef() || !get_manager().inc()) {
                     return r;
@@ -233,6 +230,7 @@ public:
                 lbool r = l_undef;
                 try {
                     scoped_timer timer(m_inc_timeout, &eh);
+                    // IF_VERBOSE(5, verbose_stream() << "combined_solver 2 - check_sat_core:\n"; m_solver2->display(verbose_stream()););
                     r = m_solver2->check_sat_core(num_assumptions, assumptions);
                 }
                 catch (z3_exception&) {
@@ -249,6 +247,7 @@ public:
         
         IF_VERBOSE(PS_VB_LVL, verbose_stream() << "(combined-solver \"using solver 1\")\n";);
         m_use_solver1_results = true;
+        // IF_VERBOSE(5, verbose_stream() << "combined_solver 1 - check_sat_core:\n"; m_solver1->display(verbose_stream()););
         return m_solver1->check_sat_core(num_assumptions, assumptions);
     }
     

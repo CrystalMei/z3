@@ -383,6 +383,7 @@ final_check_status theory_diff_logic<Ext>::final_check_eh() {
     if (!is_consistent())
         return FC_CONTINUE;
     SASSERT(is_consistent());
+    // if (assume_eqs(m_var_value_table)) return FC_CONTINUE;
     if (m_non_diff_logic_exprs) {
         return FC_GIVEUP; 
     }

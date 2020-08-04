@@ -1313,6 +1313,7 @@ namespace smt {
 
         void display_bool_var_defs(std::ostream & out) const;
 
+        void display_asserted_formulas_abs(std::ostream & out) const;
         void display_asserted_formulas(std::ostream & out) const;
 
         std::ostream& display_literal(std::ostream & out, literal l) const;

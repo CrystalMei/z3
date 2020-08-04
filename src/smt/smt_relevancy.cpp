@@ -459,6 +459,7 @@ namespace smt {
             ast_manager & m = get_manager();
             while (m_qhead < m_relevant_exprs.size()) {
                 expr * n = m_relevant_exprs.get(m_qhead);
+                IF_VERBOSE(5, verbose_stream() << "propagate_relevancy_to_args # " << n->get_id() << "\n" << mk_pp(n, m) << "\n";);
                 TRACE("propagate_relevancy_to_args", tout << "propagating relevancy to args of #" << n->get_id() << "\n";);
                 TRACE("propagate_relevancy", tout << "marking as relevant:\n" << mk_bounded_pp(n, m) << "\n";);
                 SASSERT(is_relevant_core(n));

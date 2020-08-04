@@ -185,9 +185,16 @@ namespace {
             m_context.pop(n);
         }
 
+        void smt_solver_display(std::ostream & out) const {
+            IF_VERBOSE(5, verbose_stream() << "asserted_formulas\n";);
+            IF_VERBOSE(5, m_context.display(verbose_stream()););
+            IF_VERBOSE(5, verbose_stream() << "\n";);        
+        }
+
         lbool check_sat_core2(unsigned num_assumptions, expr * const * assumptions) override {
             IF_VERBOSE(10, verbose_stream() << "\t(smt_solver check_sat_core)\n";);
             TRACE("solver_na2as", tout << "smt_solver::check_sat_core: " << num_assumptions << "\n";);
+            // IF_VERBOSE(5, verbose_stream() << "smt_solver - check_sat_core2:\n"; smt_solver_display(verbose_stream()););            
             return m_context.check(num_assumptions, assumptions);
         }
 

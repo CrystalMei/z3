@@ -101,6 +101,7 @@ namespace smt {
     template<typename Ext>
     theory_var theory_arith<Ext>::mk_var(enode * n) {
         theory_var r = theory::mk_var(n);
+        IF_VERBOSE(5, verbose_stream() << "Arith: enode mk_var: " << r << "\n";);
         SASSERT(r == static_cast<int>(m_columns.size()));
         SASSERT(check_vector_sizes());
         bool is_int  = is_int_expr(n->get_owner());
@@ -146,6 +147,7 @@ namespace smt {
 
     template<typename Ext>
     inline bool theory_arith<Ext>::reflect(app * n) const {
+        IF_VERBOSE(5, verbose_stream() << "Arith: reflect: " << mk_pp(n, m) << "\n";);
         if (reflection_enabled())
             return true; // reflect everything
         // Every underspecified operator must be reflected in the egraph.
@@ -172,6 +174,7 @@ namespace smt {
 
     template<typename Ext>
     inline bool theory_arith<Ext>::enable_cgc_for(app * n) const {
+        IF_VERBOSE(5, verbose_stream() << "Arith: enable_cgc_for: " << mk_pp(n, m) << "\n";);
         // Congruence closure is not enabled for (+ ...) and (* ...) applications.
         return !(n->get_family_id() == get_id() && (n->get_decl_kind() == OP_ADD || n->get_decl_kind() == OP_MUL));
     }
@@ -181,6 +184,7 @@ namespace smt {
     */
     template<typename Ext>
     enode * theory_arith<Ext>::mk_enode(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: mk_enode: " << mk_pp(n, m) << "\n";);
         if (ctx.e_internalized(n))
             return ctx.get_enode(n);
         else
@@ -192,6 +196,7 @@ namespace smt {
     */
     template<typename Ext>
     void theory_arith<Ext>::mk_enode_if_reflect(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: mk_enode_if_reflect: " << mk_pp(n, m) << "\n";);
         if (reflection_enabled()) {
             // make sure that n is in the e-graph
             mk_enode(n);
@@ -264,6 +269,7 @@ namespace smt {
     */
     template<typename Ext>
     void theory_arith<Ext>::internalize_internal_monomial(app * m, unsigned r_id) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_internal_monomial: " << mk_pp(m, get_manager()) << "\n";);
         if (ctx.e_internalized(m)) {
             enode * e    = ctx.get_enode(m);
             if (is_attached_to_var(e)) {
@@ -308,6 +314,7 @@ namespace smt {
     */
     template<typename Ext>
     theory_var theory_arith<Ext>::internalize_add(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_add: " << mk_pp(n, m) << "\n";);
         TRACE("add_bug", tout << "n: " << mk_pp(n, m) << "\n";);
         CTRACE("internalize_add_bug", n->get_num_args() == 2 && n->get_arg(0) == n->get_arg(1), tout << "n: " << mk_pp(n, m) << "\n";);
         SASSERT(m_util.is_add(n));
@@ -345,6 +352,7 @@ namespace smt {
     */
     template<typename Ext>
     theory_var theory_arith<Ext>::internalize_mul_core(app * t) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_mul_core: " << mk_pp(t, m) << "\n";);
         TRACE("internalize_mul_core", tout << "internalizing...\n" << mk_pp(t, m) << "\n";);
         if (!m_util.is_mul(t))
             return internalize_term_core(t);       
@@ -368,6 +376,7 @@ namespace smt {
     */
     template<typename Ext>
     theory_var theory_arith<Ext>::internalize_mul(app * m) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_mul: " << mk_pp(m, get_manager()) << "\n";);
         rational _val;
         TRACE("arith", tout << m->get_num_args() << " " << mk_pp(m, get_manager()) << "\n";);
         SASSERT(m_util.is_mul(m));
@@ -405,6 +414,7 @@ namespace smt {
 
     template<typename Ext>
     theory_var theory_arith<Ext>::mk_binary_op(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: mk_binary_op: " << mk_pp(n, m) << "\n";);
         SASSERT(n->get_num_args() == 2);
         if (ctx.e_internalized(n))
             return expr2var(n);
@@ -416,6 +426,7 @@ namespace smt {
 
     template<typename Ext>
     theory_var theory_arith<Ext>::internalize_div(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_div: " << mk_pp(n, m) << "\n";);
         rational r(1);
         theory_var s      = mk_binary_op(n);
         if (!m_util.is_numeral(n->get_arg(1), r) || r.is_zero()) found_underspecified_op(n);
@@ -426,6 +437,7 @@ namespace smt {
 
     template<typename Ext>
     theory_var theory_arith<Ext>::internalize_idiv(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_idiv: " << mk_pp(n, m) << "\n";);
         rational r;
         theory_var s      = mk_binary_op(n);
         if (!m_util.is_numeral(n->get_arg(1), r) || r.is_zero()) found_underspecified_op(n);
@@ -438,6 +450,7 @@ namespace smt {
 
     template<typename Ext>
     theory_var theory_arith<Ext>::internalize_mod(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_mod: " << mk_pp(n, m) << "\n";);
         TRACE("arith_mod", tout << "internalizing...\n" << mk_pp(n, m) << "\n";);
         rational r(1);
         theory_var s      = mk_binary_op(n);
@@ -449,6 +462,7 @@ namespace smt {
 
     template<typename Ext>
     theory_var theory_arith<Ext>::internalize_rem(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_rem: " << mk_pp(n, m) << "\n";);
         rational r(1);
         theory_var s  = mk_binary_op(n);
         if (!m_util.is_numeral(n->get_arg(1), r) || r.is_zero()) found_underspecified_op(n);
@@ -460,6 +474,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::mk_axiom(expr * ante, expr * conseq, bool simplify_conseq) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: mk_axiom:\n" << mk_pp(ante, m) << "\n" << mk_pp(conseq, m) << "\n";);
         th_rewriter & s  = ctx.get_rewriter();
         expr_ref s_ante(m), s_conseq(m);
         expr* s_conseq_n, * s_ante_n;
@@ -514,6 +529,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::mk_div_axiom(expr * p, expr * q) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: mk_div_axiom:\n" << mk_pp(p, m) << ", " << mk_pp(q, m) << "\n";);
         if (!m_util.is_zero(q)) {
             expr_ref div(m), zero(m), eqz(m), eq(m);
             TRACE("div_axiom_bug", tout << "expanding div_axiom for: " << mk_pp(p, m) << " / " << mk_pp(q, m) << "\n";);
@@ -528,6 +544,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::mk_idiv_mod_axioms(expr * dividend, expr * divisor) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: mk_idiv_mod_axioms:\n" << mk_pp(dividend, m) << ", " << mk_pp(divisor, m) << "\n";);
         th_rewriter & s  = ctx.get_rewriter();
         if (!m_util.is_zero(divisor)) {
             // if divisor is zero, then idiv and mod are uninterpreted functions.
@@ -585,6 +602,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::mk_rem_axiom(expr * dividend, expr * divisor) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: mk_rem_axiom:\n" << mk_pp(dividend, m) << ", " << mk_pp(divisor, m) << "\n";);
         // if divisor is zero, then rem is an uninterpreted function.
         expr * zero        = m_util.mk_numeral(rational(0), true);
         expr * rem         = m_util.mk_rem(dividend, divisor);
@@ -606,6 +624,7 @@ namespace smt {
     //
     template<typename Ext>
     void theory_arith<Ext>::mk_to_int_axiom(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: mk_to_int_axiom: " << mk_pp(n, m) << "\n";);
         SASSERT(m_util.is_to_int(n));
         expr* x = n->get_arg(0);
 
@@ -627,6 +646,7 @@ namespace smt {
 
     template<typename Ext>
     theory_var theory_arith<Ext>::internalize_to_int(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_to_int: " << mk_pp(n, m) << "\n";);
         SASSERT(n->get_num_args() == 1);
         if (ctx.e_internalized(n))
             return expr2var(n);
@@ -644,6 +664,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::mk_is_int_axiom(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: mk_is_int_axiom: " << mk_pp(n, m) << "\n";);
         SASSERT(m_util.is_is_int(n));
         expr* x = n->get_arg(0);
         expr* eq = m.mk_eq(m_util.mk_to_real(m_util.mk_to_int(x)), x);
@@ -653,6 +674,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::internalize_is_int(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_is_int: " << mk_pp(n, m) << "\n";);
         SASSERT(n->get_num_args() == 1);
         if (ctx.b_internalized(n))
             return;
@@ -667,6 +689,7 @@ namespace smt {
     // create the row: r - arg = 0
     template<typename Ext>
     theory_var theory_arith<Ext>::internalize_to_real(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_to_real: " << mk_pp(n, m) << "\n";);
         SASSERT(n->get_num_args() == 1);
         if (ctx.e_internalized(n))
             return expr2var(n);
@@ -690,6 +713,7 @@ namespace smt {
 
     template<typename Ext>
     theory_var theory_arith<Ext>::internalize_numeral(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_numeral: " << mk_pp(n, m) << "\n";);
         rational _val;
         VERIFY(m_util.is_numeral(n, _val));
         numeral val(_val);
@@ -698,6 +722,7 @@ namespace smt {
 
     template<typename Ext>
     theory_var theory_arith<Ext>::internalize_numeral(app * n, numeral const& val) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_numeral: " << mk_pp(n, m) << "\n";);
         
         if (ctx.e_internalized(n)) {
             return mk_var(ctx.get_enode(n));
@@ -742,6 +767,7 @@ namespace smt {
     */
     template<typename Ext>
     theory_var theory_arith<Ext>::internalize_term_core(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_term_core: " << mk_pp(n, m) << "\n";);
         TRACE("arith_internalize_detail", tout << "internalize_term_core:\n" << mk_pp(n, m) << "\n";);
         if (ctx.e_internalized(n)) {
             enode * e    = ctx.get_enode(n);
@@ -796,6 +822,8 @@ namespace smt {
         TRACE("arith_internalize_detail", tout << "before:\n" << mk_pp(n, m) << "\n";);
         if (!ctx.e_internalized(n))
             ctx.internalize(n, false);
+
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_to_int  detail (after): " << mk_pp(n, m) << "\n";);
         TRACE("arith_internalize_detail", tout << "after:\n" << mk_pp(n, m) << "\n";);
         enode * e    = ctx.get_enode(n);
         if (!is_attached_to_var(e))
@@ -976,6 +1004,7 @@ namespace smt {
     void theory_arith<Ext>::mk_bound_axioms(atom * a1) {
         theory_var v = a1->get_var();
         atoms & occs = m_var_occs[v];
+        IF_VERBOSE(5, verbose_stream() << "Arith: mk_bound_axioms:\nadd bound axioms for v" << v << ", " << a1 << "\n";);
         TRACE("mk_bound_axioms", tout << "add bound axioms for v" << v << " " << a1 << "\n";);
         if (!ctx.is_searching()) {
             //
@@ -1032,6 +1061,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::mk_bound_axiom(atom* a1, atom* a2) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: mk_bound_axiom:\n" << a1 << ", " << a2 << "\n";);
         TRACE("mk_bound_axioms", tout << a1 << " " << a2 << "\n";);
         theory_var v = a1->get_var();
         literal   l1(a1->get_bool_var());
@@ -1224,6 +1254,7 @@ namespace smt {
 
     template<typename Ext>
     bool theory_arith<Ext>::internalize_atom(app * n, bool gate_ctx) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_atom:\n" << mk_pp(n, m) << "\n";);
         TRACE("arith_internalize", tout << "internalizing atom:\n" << mk_pp(n, m) << "\n";);
         SASSERT(m_util.is_le(n) || m_util.is_ge(n) || m_util.is_is_int(n));
         SASSERT(!ctx.b_internalized(n));
@@ -1289,6 +1320,7 @@ namespace smt {
 
     template<typename Ext>
     bool theory_arith<Ext>::internalize_term(app * term) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_term:\n" << mk_pp(term, m) << "\n";);
         TRACE("arith_internalize", tout << "internalising term:\n" << mk_pp(term, m) << "\n";);
         theory_var v = internalize_term_core(term);
         TRACE("arith_internalize", tout << "theory_var: " << v << "\n";);
@@ -1297,6 +1329,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::internalize_eq_eh(app * atom, bool_var v) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: internalize_eq_eh:\n" << mk_pp(atom, m) << "\n";);
         expr* _lhs = nullptr, *_rhs = nullptr;
         if (m_params.m_arith_eager_eq_axioms && m.is_eq(atom, _lhs, _rhs) && is_app(_lhs) && is_app(_rhs)) {
             app * lhs      = to_app(_lhs);
@@ -1322,6 +1355,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::assign_eh(bool_var v, bool is_true) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: assign_eh: p" << v << " := " << (is_true?"true":"false") << "\n";);
         TRACE("arith_verbose", tout << "p" << v << " := " << (is_true?"true":"false") << "\n";);
         atom * a = get_bv2a(v);
         if (!a) return;
@@ -1333,6 +1367,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::relevant_eh(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: relevant_eh: " << mk_pp(n, m) << "\n";);
         TRACE("arith_relevant_eh", tout << "relevant_eh: " << mk_pp(n, m) << "\n";);
         if (m_util.is_mod(n))
             mk_idiv_mod_axioms(n->get_arg(0), n->get_arg(1));
@@ -1348,6 +1383,8 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::new_eq_eh(theory_var v1, theory_var v2) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: new_eq_eh: " << "#" << get_enode(v1)->get_owner_id() << " = #" << get_enode(v2)->get_owner_id() << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "Arith: new_eq_eh (detail): " << mk_pp(get_enode(v1)->get_owner(), m) << "\n" << mk_pp(get_enode(v2)->get_owner(), m) << "\n";);
         TRACE("arith_new_eq_eh", tout << "#" << get_enode(v1)->get_owner_id() << " = #" << get_enode(v2)->get_owner_id() << "\n";);
         TRACE("arith_new_eq_eh_detail", tout << mk_pp(get_enode(v1)->get_owner(), m) << "\n" <<
               mk_pp(get_enode(v2)->get_owner(), m) << "\n";);
@@ -1404,6 +1441,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::new_diseq_eh(theory_var v1, theory_var v2) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: new_diseq_eh: " << mk_bounded_pp(get_enode(v1)->get_owner(), m) << "\n" << mk_bounded_pp(get_enode(v2)->get_owner(), m) << "\n";);
         TRACE("arith_new_diseq_eh", tout << mk_bounded_pp(get_enode(v1)->get_owner(), m) << "\n" <<
               mk_bounded_pp(get_enode(v2)->get_owner(), m) << "\n";);
         m_stats.m_assert_diseq++;
@@ -1417,6 +1455,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::init_search_eh() {
+        IF_VERBOSE(5, verbose_stream() << "Arith: init_search_eh:\n"; display(verbose_stream()););
         TRACE("arith_init_search", display(tout););
         m_num_conflicts      = 0;
         m_branch_cut_counter = 0;
@@ -1432,6 +1471,7 @@ namespace smt {
 
     template<typename Ext>
     final_check_status theory_arith<Ext>::final_check_core() {
+        IF_VERBOSE(5, verbose_stream() << "Arith: final_check_core:\n"; display(verbose_stream()););
         m_model_depends_on_computed_epsilon = false;
         unsigned old_idx = m_final_check_idx;
         final_check_status result = FC_DONE;
@@ -1447,6 +1487,7 @@ namespace smt {
             switch (m_final_check_idx) {
             case 0:
                 ok = check_int_feasibility();
+                IF_VERBOSE(5, verbose_stream() << "Arith: final_check check_int_feasibility(), ok: " << ok << "\n";);
                 TRACE("arith", tout << "check_int_feasibility(), ok: " << ok << "\n";);
                 break;
             case 1:
@@ -1454,10 +1495,12 @@ namespace smt {
                     ok = FC_CONTINUE;
                 else
                     ok = FC_DONE;
+                IF_VERBOSE(5, verbose_stream() << "Arith: final_check assume_eqs(), ok: " << ok << "\n";);
                 TRACE("arith", tout << "assume_eqs(), ok: " << ok << "\n";);
                 break;
             default:
                 ok = process_non_linear();
+                IF_VERBOSE(5, verbose_stream() << "Arith: final_check non_linear(), ok: " << ok << "\n";);
                 TRACE("arith", tout << "non_linear(), ok: " << ok << "\n";);
                 break;
             }
@@ -1485,6 +1528,9 @@ namespace smt {
 
     template<typename Ext>
     final_check_status theory_arith<Ext>::final_check_eh() {
+        IF_VERBOSE(5, verbose_stream() << "Arith: final_check_eh:\n"; display(verbose_stream()););
+        IF_VERBOSE(5, verbose_stream() << "Arith: arith_eq_adapter_info:\n"; m_arith_eq_adapter.display_already_processed(verbose_stream()););
+        
         TRACE("arith_eq_adapter_info", m_arith_eq_adapter.display_already_processed(tout););
         TRACE("arith", display(tout););
 
@@ -1514,6 +1560,7 @@ namespace smt {
 
     template<typename Ext>
     void theory_arith<Ext>::propagate() {
+        IF_VERBOSE(5, verbose_stream() << "Arith: propagate:\n"; display(verbose_stream()););
         TRACE("arith_propagate", tout << "propagate\n"; display(tout););
         if (!process_atoms())
             return;
@@ -1837,6 +1884,7 @@ namespace smt {
             SASSERT(m_value[v] == get_value(v));
             m_old_value[v] = m_value[v];
             m_update_trail_stack.push_back(v);
+            IF_VERBOSE(5, verbose_stream() << "Arith: save_value: "<< "v" << v << " = " << get_value(v) << "\n";);
             TRACE("save_value", tout << "v" << v << " = " << get_value(v) << "\n";);
         }
         m_changed_assignment = true;
@@ -1921,6 +1969,7 @@ namespace smt {
     template<typename Ext>
     template<bool Lazy>
     void theory_arith<Ext>::pivot(theory_var x_i, theory_var x_j, numeral const & a_ij, bool apply_gcd_test) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: pivot: " << "pivoting: v" << x_i << ", v" << x_j << "\n";);
         TRACE("arith_pivoting", tout << "pivoting: v" << x_i << ", v" << x_j << "\n";);
         m_stats.m_pivots++;
         SASSERT(is_base(x_i) || is_quasi_base(x_i));
@@ -1964,6 +2013,7 @@ namespace smt {
         CASSERT("arith", wf_rows());
         CASSERT("arith", wf_columns());
         CASSERT("arith", valid_row_assignment());
+        IF_VERBOSE(5, verbose_stream() << "Arith: pivot: " << "after pivoting\n"; display(verbose_stream()));
         TRACE("arith_pivot", tout << "after pivoting:\n";
               display(tout););
         TRACE("pivot_shape", display_rows_shape(tout););
@@ -2293,6 +2343,7 @@ namespace smt {
     */
     template<typename Ext>
     bool theory_arith<Ext>::make_feasible() {
+        IF_VERBOSE(5, verbose_stream() << "Arith: mk_feasible:\n"; display(verbose_stream()););
         TRACE("arith_make_feasible", tout << "make_feasible\n"; display(tout););
         CASSERT("arith", wf_rows());
         CASSERT("arith", wf_columns());
@@ -2406,6 +2457,7 @@ namespace smt {
     */
     template<typename Ext>
     bool theory_arith<Ext>::assert_lower(bound * b) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: assert_lower:\n"; display(verbose_stream()););
         SASSERT(b->get_bound_kind() == B_LOWER);
         theory_var          v = b->get_var();
         inf_numeral const & k = b->get_value();
@@ -2453,6 +2505,7 @@ namespace smt {
     */
     template<typename Ext>
     bool theory_arith<Ext>::assert_upper(bound * b) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: assert_upper:\n"; display(verbose_stream()););
         SASSERT(b->get_bound_kind() == B_UPPER);
         theory_var          v = b->get_var();
         inf_numeral const & k = b->get_value();
@@ -2498,6 +2551,7 @@ namespace smt {
 
     template<typename Ext>
     bool theory_arith<Ext>::assert_bound(bound * b) {
+        IF_VERBOSE(5, verbose_stream() << "Arith: assert_bound (display_bound):\n"; display_bound(verbose_stream(), b); verbose_stream() << "assert_bound(display): \n"; display(verbose_stream()););
         TRACE("assert_bound", display_bound(tout, b); display(tout););
         theory_var v = b->get_var();
 
@@ -2998,6 +3052,7 @@ namespace smt {
     */
     template<typename Ext>
     void theory_arith<Ext>::propagate_bounds() {
+        IF_VERBOSE(5, verbose_stream() << "Arith: propagate_bounds:\n"; display(verbose_stream()););
         TRACE("propagate_bounds_detail", display(tout););
         for (unsigned r_idx : m_to_check) {
             row & r = m_rows[r_idx];
@@ -3260,6 +3315,7 @@ namespace smt {
     template<typename Ext>
     model_value_proc * theory_arith<Ext>::mk_value(enode * n, model_generator & mg) {
         theory_var v = n->get_th_var(get_id());
+        IF_VERBOSE(5, verbose_stream() << "Arith: enode mk_value: " << v << "\n";);
         SASSERT(v != null_theory_var);
         inf_numeral const & val = get_value(v);
         rational num = val.get_rational().to_rational() + m_epsilon.to_rational() * val.get_infinitesimal().to_rational();
@@ -3291,6 +3347,7 @@ namespace smt {
     template<typename Ext>
     bool theory_arith<Ext>::get_value(enode * n, expr_ref & r) {
         theory_var v = n->get_th_var(get_id());
+        IF_VERBOSE(5, verbose_stream() << "Arith: get_value: " << v << "\n";);
         inf_numeral val;
         return v != null_theory_var && (val = get_value(v), (!is_int(v) || val.is_int())) && to_expr(val, is_int(v), r);
     }
@@ -3298,6 +3355,7 @@ namespace smt {
     template<typename Ext>
     bool theory_arith<Ext>::get_lower(enode * n, expr_ref & r) {
         theory_var v = n->get_th_var(get_id());
+        IF_VERBOSE(5, verbose_stream() << "Arith: get_lower: " << v << "\n";);
         bound* b = (v == null_theory_var) ? nullptr : lower(v);
         return b && to_expr(b->get_value(), is_int(v), r);
     }
@@ -3305,6 +3363,7 @@ namespace smt {
     template<typename Ext>
     bool theory_arith<Ext>::get_upper(enode * n, expr_ref & r) {
         theory_var v = n->get_th_var(get_id());
+        IF_VERBOSE(5, verbose_stream() << "Arith: get_upper: " << v << "\n";);
         bound* b = (v == null_theory_var) ? nullptr : upper(v);
         return b && to_expr(b->get_value(), is_int(v), r);
     }
@@ -3312,6 +3371,7 @@ namespace smt {
     template<typename Ext>
     bool theory_arith<Ext>::get_lower(enode * n, rational& r, bool& is_strict) {
         theory_var v = n->get_th_var(get_id());
+        IF_VERBOSE(5, verbose_stream() << "Arith: get_lower (rational): " << v << "\n";);
         bound* b = (v == null_theory_var) ? nullptr : lower(v);
         return b && (r = b->get_value().get_rational().to_rational(), is_strict = b->get_value().get_infinitesimal().is_pos(), true);
     }
@@ -3319,6 +3379,7 @@ namespace smt {
     template<typename Ext>
     bool theory_arith<Ext>::get_upper(enode * n, rational& r, bool& is_strict) {
         theory_var v = n->get_th_var(get_id());
+        IF_VERBOSE(5, verbose_stream() << "Arith: get_upper (rational): " << v << "\n";);
         bound* b = (v == null_theory_var) ? nullptr : upper(v);
         return b && (r = b->get_value().get_rational().to_rational(), is_strict = b->get_value().get_infinitesimal().is_neg(), true);
     }

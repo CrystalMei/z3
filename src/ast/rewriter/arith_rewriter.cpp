@@ -664,8 +664,14 @@ bool arith_rewriter::is_arith_term(expr * n) const {
 br_status arith_rewriter::mk_eq_core(expr * arg1, expr * arg2, expr_ref & result) {
     br_status st = BR_FAILED;
     if (m_eq2ineq) {
-        result = m().mk_and(m_util.mk_le(arg1, arg2), m_util.mk_ge(arg1, arg2));
-        st = BR_REWRITE2;
+        // do not do eq2ineq for numerals
+        numeral a1, a2;
+        if (m_util.is_numeral(arg1, a1) || m_util.is_numeral(arg2, a2))
+            return st;
+        else {
+            result = m().mk_and(m_util.mk_le(arg1, arg2), m_util.mk_ge(arg1, arg2));
+            st = BR_REWRITE2;
+        }
     }
     else if (m_arith_lhs || is_arith_term(arg1) || is_arith_term(arg2)) {
         st = mk_le_ge_eq_core(arg1, arg2, EQ, result);

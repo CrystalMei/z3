@@ -1506,11 +1506,12 @@ void cmd_context::pop(unsigned n) {
 }
 
 void cmd_context::check_sat(unsigned num_assumptions, expr * const * assumptions) {
+    // IF_VERBOSE(5, verbose_stream() << "cmd_context - check_sat:\n"; m_solver->display(verbose_stream()););
     if (m_ignore_check)
         return;
     IF_VERBOSE(100, verbose_stream() << "(started \"check-sat\")" << std::endl;);
     init_manager();
-    IF_VERBOSE(101, verbose_stream() << "check_sat AST:\n"; for (expr * e : m_assertions) verbose_stream() << "\n" << mk_pp(e, m()) << "\n";;verbose_stream() << "\n";);
+    IF_VERBOSE(101, verbose_stream() << "check_sat AST:"; for (expr * e : m_assertions) verbose_stream() << "\n" << mk_pp(e, m()) << "\n";;verbose_stream() << "\n";);
     TRACE("before_check_sat", dump_assertions(tout););
     unsigned timeout = m_params.m_timeout;
     unsigned rlimit  = m_params.rlimit();
@@ -1560,6 +1561,7 @@ void cmd_context::check_sat(unsigned num_assumptions, expr * const * assumptions
         scoped_timer timer(timeout, &eh);
         scoped_rlimit _rlimit(m().limit(), rlimit);
         try {
+            // IF_VERBOSE(5, verbose_stream() << "cmd_context - before call m_solver.check_sat:\n"; m_solver->display(verbose_stream()););
             r = m_solver->check_sat(num_assumptions, assumptions);
             if (r == l_undef && !m().inc()) {
                 m_solver->set_reason_unknown(eh);

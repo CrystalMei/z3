@@ -455,6 +455,9 @@ namespace smt {
         scoped_suspend_rlimit _suspend_cancel(m.limit());
 
         try {
+            IF_VERBOSE(5, verbose_stream() << "add_eq: assigning: #" << n1->get_owner_id() << " = #" << n2->get_owner_id() << "\n";);
+            IF_VERBOSE(5, verbose_stream() << "add_eq (detail): " << "assigning\n" << enode_pp(n1, *this) << "\n" << enode_pp(n2, *this) << "\n" << "kind: " << js.get_kind() << "\n";);
+
             TRACE("add_eq", tout << "assigning: #" << n1->get_owner_id() << " = #" << n2->get_owner_id() << "\n";);
             TRACE("add_eq_detail", tout << "assigning\n" << enode_pp(n1, *this) << "\n" << enode_pp(n2, *this) << "\n";
                   tout << "kind: " << js.get_kind() << "\n";);
@@ -1383,6 +1386,7 @@ namespace smt {
        assigned to true (false).
     */
     void context::propagate_bool_var_enode(bool_var v) {
+        IF_VERBOSE(5, verbose_stream() << "propagate_bool_var_enode - var: " << v << " #" << bool_var2expr(v)->get_id() << "\n";);
         SASSERT(get_assignment(v) != l_undef);
         SASSERT(get_bdata(v).is_enode());
         lbool val  = get_assignment(v);
@@ -3084,6 +3088,9 @@ namespace smt {
         if (get_cancel_flag()) return;
         TRACE("internalize_assertions", tout << "internalize_assertions()...\n";);
         timeit tt(get_verbosity_level() >= 100, "smt.preprocessing");
+        // IF_VERBOSE(5, verbose_stream() << "\nbefore reduce_assertions...\n";);
+        // IF_VERBOSE(5, m_asserted_formulas.display(verbose_stream()););
+        // IF_VERBOSE(5, verbose_stream() << "\n";);
         reduce_assertions();
         if (get_cancel_flag()) return;
         if (!m_asserted_formulas.inconsistent()) {
@@ -3482,6 +3489,9 @@ namespace smt {
     }
 
     lbool context::check(unsigned num_assumptions, expr * const * assumptions, bool reset_cancel) {
+        // IF_VERBOSE(5, verbose_stream() << "\ncontext.check: asserted_formulas\n";);
+        // IF_VERBOSE(5, m_asserted_formulas.display(verbose_stream()););
+        // IF_VERBOSE(5, verbose_stream() << "\n";);
         if (!check_preamble(reset_cancel)) return l_undef;
         SASSERT(at_base_level());
         setup_context(false);

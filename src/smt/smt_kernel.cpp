@@ -113,6 +113,9 @@ namespace smt {
         }
         
         lbool check(unsigned num_assumptions, expr * const * assumptions) {
+            // IF_VERBOSE(5, verbose_stream() << "\nkernel.check: asserted_formulas\n";);
+            // IF_VERBOSE(5, display(verbose_stream()););
+            // IF_VERBOSE(5, verbose_stream() << "\n";);
             return m_kernel.check(num_assumptions, assumptions);
         }
 
@@ -293,6 +296,9 @@ namespace smt {
     }
 
     lbool kernel::check(unsigned num_assumptions, expr * const * assumptions) {
+        // IF_VERBOSE(5, verbose_stream() << "\nkernel.check: asserted_formulas\n";);
+        // IF_VERBOSE(5, display(verbose_stream()););
+        // IF_VERBOSE(5, verbose_stream() << "\n";);
         lbool r = m_imp->check(num_assumptions, assumptions);
         TRACE("smt_kernel", tout << "check result: " << r << "\n";);
         return r;

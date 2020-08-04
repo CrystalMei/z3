@@ -392,11 +392,13 @@ namespace smt {
 
     template<typename Ext>
     void theory_dense_diff_logic<Ext>::init_search_eh() {
+        IF_VERBOSE(5, verbose_stream() << "DDL: init_search_eh:\n"; display(verbose_stream()););
         m_arith_eq_adapter.init_search_eh();
     }
 
     template<typename Ext>
     final_check_status theory_dense_diff_logic<Ext>::final_check_eh() {
+        IF_VERBOSE(5, verbose_stream() << "DDL: final_check_eh:\n"; display(verbose_stream()););
         init_model();
         if (assume_eqs(m_var_value_table))
             return FC_CONTINUE;
@@ -590,7 +592,8 @@ namespace smt {
 
     template<typename Ext>
     inline void theory_dense_diff_logic<Ext>::add_edge(theory_var source, theory_var target, numeral const & offset, literal l) {
-        IF_VERBOSE(5, verbose_stream() << "\tDenseDL: add_edge\n";);
+        IF_VERBOSE(5, verbose_stream() << "\tDDL: add_edge\n";);
+        IF_VERBOSE(5, verbose_stream() << "DDL: trying adding edge:\n#" << get_enode(source)->get_owner_id() << " -- " << offset << " --> #" << get_enode(target)->get_owner_id() << "\n";);
         TRACE("ddl", tout << "trying adding edge: #" << get_enode(source)->get_owner_id() << " -- " << offset << " --> #" << get_enode(target)->get_owner_id() << "\n";);
         cell & c_inv = m_matrix[target][source];
         if (c_inv.m_edge_id != null_edge_id && - c_inv.m_distance > offset) {

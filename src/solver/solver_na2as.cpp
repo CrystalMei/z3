@@ -68,6 +68,7 @@ lbool solver_na2as::check_sat_core(unsigned num_assumptions, expr * const * assu
     IF_VERBOSE(101, verbose_stream() << "\n";);
     append_assumptions app(m_assumptions, num_assumptions, assumptions);
     TRACE("solver_na2as", display(tout););
+    // IF_VERBOSE(5, verbose_stream() << "solver_na2as - check_sat_core:\n"; display(verbose_stream()););
     return check_sat_core2(m_assumptions.size(), m_assumptions.c_ptr());
 }
 

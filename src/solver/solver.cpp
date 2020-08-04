@@ -327,6 +327,7 @@ expr_ref_vector solver::get_non_units() {
 lbool solver::check_sat(unsigned num_assumptions, expr * const * assumptions) {
     lbool r = l_undef;
     try {
+        // IF_VERBOSE(5, verbose_stream() << "solver check_sat:\n"; display(verbose_stream()););
         r = check_sat_core(num_assumptions, assumptions);
     }
     catch (...) {
