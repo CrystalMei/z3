@@ -492,13 +492,13 @@ namespace smt {
         that can internalize n.
     */
     bool context::internalize_theory_atom(app * n, bool gate_ctx) {
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_theory_atom:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_theory_atom: #" << n->get_id() << "\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!b_internalized(n));
         theory * th  = m_theories.get_plugin(n->get_family_id());
         TRACE("datatype_bug", tout << "internalizing theory atom:\n" << mk_pp(n, m) << "\n";);
         if (!th || !th->internalize_atom(n, gate_ctx))
             return false;
-        TRACE("datatype_bug", tout << "internalization succeeded\n" << mk_pp(n, m) << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_theory_atom: #" << n->get_id() << " internalization succeeded\n" << mk_pp(n, m) << "\n";);
         SASSERT(b_internalized(n));
         TRACE("internalize_theory_atom", tout << "internalizing theory atom: #" << n->get_id() << "\n";);
         bool_var v        = get_bool_var(n);
@@ -902,8 +902,7 @@ namespace smt {
         //SASSERT(!m.is_not(n));
         unsigned id = n->get_id();
         bool_var v  = m_b_internalized_stack.size();
-        IF_VERBOSE(5, verbose_stream() << "mk_bool_var: creating boolean variable: " << v << " for: " << mk_pp(n, m) << ", its ID: " << n->get_id() << "\n";);
-        IF_VERBOSE(5, verbose_stream() << "mk_bool_var: mk_var_bug - mk_bool: " << v << "\n";);      
+        IF_VERBOSE(5, verbose_stream() << "\nmk_bool_var: creating boolean variable: " << v << " for:\n" << mk_pp(n, m) << ", its ID: " << n->get_id() << "\n\n";);  
         TRACE("mk_bool_var", tout << "creating boolean variable: " << v << " for:\n" << mk_pp(n, m) << " " << n->get_id() << "\n";);
         TRACE("mk_var_bug", tout << "mk_bool: " << v << "\n";);                
         set_bool_var(id, v);

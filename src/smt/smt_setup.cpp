@@ -23,6 +23,7 @@ Revision History:
 #include "smt/theory_lra.h"
 #include "smt/theory_dense_diff_logic.h"
 #include "smt/theory_diff_logic.h"
+#include "smt/theory_diff_logic_weak.h"
 #include "smt/theory_utvpi.h"
 #include "smt/theory_array.h"
 #include "smt/theory_array_full.h"
@@ -821,7 +822,27 @@ namespace smt {
                 else {
                     IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Diff Logic - theory_rdl)\n";);
                     m_context.register_plugin(alloc(smt::theory_rdl, m_context)); }
-    }
+            }
+            break;
+        case AS_DIFF_LOGIC_WEAK:
+            IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Weaken Diff Logic)\n";);
+            m_params.m_arith_eq2ineq  = true;
+            if (fixnum) {
+                if (int_only) {
+                    IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Weaken Diff Logic - theory_weak_fidl)\n";);
+                    m_context.register_plugin(alloc(smt::theory_weak_fidl, m_context)); }
+                else {
+                    IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Weaken Diff Logic - theory_weak_frdl)\n";);
+                    m_context.register_plugin(alloc(smt::theory_weak_frdl, m_context)); }
+            }
+            else {
+                if (int_only) {
+                    IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Weaken Diff Logic - theory_weak_idl)\n";);
+                    m_context.register_plugin(alloc(smt::theory_weak_idl, m_context)); }
+                else {
+                    IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Weaken Diff Logic - theory_weak_rdl)\n";);
+                    m_context.register_plugin(alloc(smt::theory_weak_rdl, m_context)); }
+            }
             break;
         case AS_DENSE_DIFF_LOGIC:
             IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Dense Diff Logic)\n";);
@@ -861,7 +882,7 @@ namespace smt {
                 IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Old Arith - theory_i_arith)\n";);
                 m_context.register_plugin(alloc(smt::theory_i_arith, m_context)); }
             else {
-                IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Old Arith - theory_i_arith)\n";);
+                IF_VERBOSE(10, verbose_stream() << "\t(setup arith: Old Arith - theory_mi_arith)\n";);
                 m_context.register_plugin(alloc(smt::theory_mi_arith, m_context)); }
             break;
         case AS_NEW_ARITH:

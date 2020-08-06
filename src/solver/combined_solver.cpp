@@ -217,8 +217,8 @@ public:
         if (m_inc_mode) {
             if (m_inc_timeout == UINT_MAX) {
                 IF_VERBOSE(PS_VB_LVL, verbose_stream() << "(combined-solver \"using solver 2 (without a timeout)\")\n";);
-                IF_VERBOSE(5, verbose_stream() << "combined_solver 2 - check_sat_core:\n"; m_solver2->display(verbose_stream()););
-                IF_VERBOSE(5, verbose_stream() << "combined_solver 1 - check_sat_core:\n"; m_solver1->display(verbose_stream()););
+                // IF_VERBOSE(5, verbose_stream() << "combined_solver 2 - check_sat_core:\n"; m_solver2->display(verbose_stream()););
+                // IF_VERBOSE(5, verbose_stream() << "combined_solver 1 - check_sat_core:\n"; m_solver1->display(verbose_stream()););
                 lbool r = m_solver2->check_sat_core(num_assumptions, assumptions);
                 if (r != l_undef || !use_solver1_when_undef() || !get_manager().inc()) {
                     return r;

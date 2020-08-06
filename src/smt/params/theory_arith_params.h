@@ -28,7 +28,8 @@ enum arith_solver_id {
     AS_DENSE_DIFF_LOGIC,      // 3
     AS_UTVPI,                 // 4
     AS_OPTINF,                // 5
-    AS_NEW_ARITH              // 6
+    AS_NEW_ARITH,             // 6
+    AS_DIFF_LOGIC_WEAK        // 7
 };
 
 enum bound_prop_mode {

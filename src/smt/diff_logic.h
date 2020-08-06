@@ -501,6 +501,7 @@ public:
         edge_id new_id = m_edges.size();
         m_edges.push_back(edge(source, target, weight, m_timestamp, ex));
         m_activity.push_back(0);
+        IF_VERBOSE(5, verbose_stream() << "DL: add_edge: "; display_edge(verbose_stream(), m_edges.back()););
         TRACE("dl_bug", tout << "creating edge:\n"; display_edge(tout, m_edges.back()););
         m_out_edges[source].push_back(new_id);
         m_in_edges[target].push_back(new_id);
@@ -1005,13 +1006,19 @@ public:
 
     template<typename FilterAssignmentProc>
     void display_core(std::ostream & out, FilterAssignmentProc p) const {
+        IF_VERBOSE(5, verbose_stream() << "\tedge\n";);
         display_edges(out);
+        IF_VERBOSE(5, verbose_stream() << "\tassignment\n";);
         display_assignment(out, p);
     }
 
     void display_edges(std::ostream & out) const {
         for (edge const& e : m_edges) {
             if (e.is_enabled()) {
+                display_edge(out, e);
+            }
+            else {
+                out << "disabled edge: ";
                 display_edge(out, e);
             }
         }
@@ -1022,7 +1029,7 @@ public:
     }
 
     std::ostream& display_edge(std::ostream & out, const edge & e) const {
-        return out << e.get_explanation() << " (<= (- $" << e.get_target() << " $" << e.get_source() << ") " << e.get_weight() << ") " << e.get_timestamp() << "\n";
+        return out << e.get_explanation() << " (<= (- dst$" << e.get_target() << " src$" << e.get_source() << ") [weight: " << e.get_weight() << "] ) {timestamp: " << e.get_timestamp() << "}\n";
     }
 
     template<typename FilterAssignmentProc>
