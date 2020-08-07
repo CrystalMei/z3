@@ -282,6 +282,7 @@ bool theory_diff_logic<Ext>::internalize_atom(app * n, bool gate_ctx) {
     m_bool_var2atom.insert(bv, a);
 
     IF_VERBOSE(5, verbose_stream() << "DL: internalize_atom done: " << mk_pp(n, m) << "\n"; m_graph.display_edge(verbose_stream() << "pos: ", pos); m_graph.display_edge(verbose_stream() << "neg: ", neg); );
+    IF_VERBOSE(5, verbose_stream() << "\nDL: graph display:\n"; display(verbose_stream()); );
     TRACE("arith", 
           tout << mk_pp(n, m) << "\n";
           m_graph.display_edge(tout << "pos: ", pos); 
@@ -374,19 +375,24 @@ void theory_diff_logic<Ext>::pop_scope_eh(unsigned num_scopes) {
 
 template<typename Ext>
 final_check_status theory_diff_logic<Ext>::final_check_eh() {
+    IF_VERBOSE(5, verbose_stream() << "\nDL: final_check_eh\n";);
 
     if (can_propagate()) {
         propagate_core();
+        IF_VERBOSE(5, verbose_stream() << "DL: final_check - can propagate, continue\n";);
         return FC_CONTINUE;
     }
 
     TRACE("arith_final", display(tout); );
     if (!is_consistent())
+        IF_VERBOSE(5, verbose_stream() << "DL: final_check - not consistent, continue\n";);
         return FC_CONTINUE;
     SASSERT(is_consistent());
     if (assume_eqs(m_var_value_table))
+        IF_VERBOSE(5, verbose_stream() << "DL: final_check - assume_eqs, continue\n";);
         return FC_CONTINUE;
     if (m_non_diff_logic_exprs) {
+        IF_VERBOSE(5, verbose_stream() << "DL: final_check - non diff logic exprs, giveup\n";);
         return FC_GIVEUP; 
     }
 
@@ -396,12 +402,14 @@ final_check_status theory_diff_logic<Ext>::final_check_eh() {
             fid != m.get_basic_family_id() &&
             !is_uninterp_const(n->get_owner())) {
             TRACE("arith", tout << mk_pp(n->get_owner(), m) << "\n";);
+            IF_VERBOSE(5, verbose_stream() << "DL: final_check - giveup on enode\n" << mk_pp(n->get_owner(), m) << "\n";);
             return FC_GIVEUP;
         }
     }
     
     // either will already be zero (as we don't do mixed constraints).
     m_graph.set_to_zero(get_zero(true), get_zero(false));
+    IF_VERBOSE(5, verbose_stream() << "DL: final_check - done\n";);
 
     return FC_DONE;
 }
@@ -906,6 +914,7 @@ void theory_diff_logic<Ext>::reset_eh() {
 
 template<typename Ext>
 void theory_diff_logic<Ext>::compute_delta() {
+    IF_VERBOSE(5, verbose_stream() << "DL: compute_delta\n"; );
     m_delta = rational(1);
     m_graph.set_to_zero(get_zero(true), get_zero(false));
     unsigned num_edges = m_graph.get_num_edges();
@@ -922,6 +931,9 @@ void theory_diff_logic<Ext>::compute_delta() {
         rational k_y = m_graph.get_assignment(src).get_infinitesimal().to_rational();
         rational n_c = w.get_rational().to_rational();
         rational k_c = w.get_infinitesimal().to_rational();
+        IF_VERBOSE(5, verbose_stream() << "(n_x,k_x): " << n_x << ", " << k_x << ", (n_y,k_y): " << n_y << ", " << k_y << ", (n_c,k_c): " << n_c << ", " << k_c << "\n";);
+        TRACE("arith", tout << "(n_x,k_x): " << n_x << ", " << k_x << ", (n_y,k_y): " 
+              << n_y << ", " << k_y << ", (n_c,k_c): " << n_c << ", " << k_c << "\n";);
         TRACE("arith", tout << "(n_x,k_x): " << n_x << ", " << k_x << ", (n_y,k_y): " 
               << n_y << ", " << k_y << ", (n_c,k_c): " << n_c << ", " << k_c << "\n";);
         if (n_x < n_y + n_c && k_x > k_y + k_c) {

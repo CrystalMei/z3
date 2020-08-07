@@ -237,6 +237,7 @@ namespace smt {
             switch(to_app(n)->get_decl_kind()) {
             case OP_AND: {
                 for (expr * arg : *to_app(n)) {
+                    IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_AND - calling rec with true\n" << mk_pp(arg, m) << "\n" << mk_ll_pp(arg, m) << "\n";);
                     internalize_rec(arg, true);
                     literal lit = get_literal(arg);
                     mk_root_clause(1, &lit, pr);
@@ -246,6 +247,7 @@ namespace smt {
             case OP_OR: {
                 literal_buffer lits;
                 for (expr * arg : *to_app(n)) { 
+                    IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_OR - calling rec with true\n" << mk_pp(arg, m) << "\n" << mk_ll_pp(arg, m) << "\n";);
                     internalize_rec(arg, true);
                     lits.push_back(get_literal(arg));
                 }
@@ -256,7 +258,9 @@ namespace smt {
             case OP_EQ: {
                 expr * lhs = to_app(n)->get_arg(0);
                 expr * rhs = to_app(n)->get_arg(1);
+                IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_EQ - calling rec with true - lhs\n" << mk_pp(lhs, m) << "\n" << mk_ll_pp(lhs, m) << "\n";);
                 internalize_rec(lhs, true);
+                IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_EQ - calling rec with true - rhs\n" << mk_pp(rhs, m) << "\n" << mk_ll_pp(rhs, m) << "\n";);
                 internalize_rec(rhs, true);
                 literal l1 = get_literal(lhs);
                 literal l2 = get_literal(rhs);
@@ -268,8 +272,11 @@ namespace smt {
                 expr * c = to_app(n)->get_arg(0);
                 expr * t = to_app(n)->get_arg(1);
                 expr * e = to_app(n)->get_arg(2);
+                IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_ITE - calling rec with true - c\n" << mk_pp(c, m) << "\n" << mk_ll_pp(c, m) << "\n";);
                 internalize_rec(c, true);
+                IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_ITE - calling rec with true - t\n" << mk_pp(t, m) << "\n" << mk_ll_pp(t, m) << "\n";);
                 internalize_rec(t, true);
+                IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_ITE - calling rec with true - e\n" << mk_pp(e, m) << "\n" << mk_ll_pp(e, m) << "\n";);
                 internalize_rec(e, true);
                 literal cl = get_literal(c);
                 literal tl = get_literal(t);
@@ -294,7 +301,7 @@ namespace smt {
     }
 
     void context::assert_default(expr * n, proof * pr) {
-        IF_VERBOSE(5, verbose_stream() << "assert_default: expr = " << mk_pp(n, m) << ", its ID: " << n->get_id() << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "assert_default: expr #" << n->get_id() << ":\n" << mk_pp(n, m) << "\n";);
         internalize(n, true);
         literal l = get_literal(n);
         if (l == false_literal) {
@@ -356,8 +363,10 @@ namespace smt {
     }
 
     void context::internalize(expr* const* exprs, unsigned num_exprs, bool gate_ctx) {
+        IF_VERBOSE(5, verbose_stream() << "\nsmt_internalize:\n\n";);
         internalize_deep(exprs, num_exprs);
         for (unsigned i = 0; i < num_exprs; ++i) {
+            IF_VERBOSE(5, verbose_stream() << "\nsmt_internalize: #" << i << "\n" << mk_pp(exprs[i], m) << "\n";);
             internalize_rec(exprs[i], gate_ctx);
         }
     }
@@ -563,6 +572,7 @@ namespace smt {
        context. 
     */
     void context::internalize_quantifier(quantifier * q, bool gate_ctx) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_quantifier:\n" << mk_pp(q, m) << "\n" << mk_ll_pp(q, m) << "\n";);
         TRACE("internalize_quantifier", tout << mk_pp(q, m) << "\n";);
         CTRACE("internalize_quantifier_zero", q->get_weight() == 0, tout << mk_pp(q, m) << "\n";);
         SASSERT(gate_ctx); // limitation of the current implementation
@@ -584,6 +594,7 @@ namespace smt {
     }
 
     void context::internalize_lambda(quantifier * q) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_lambda:\n" << mk_pp(q, m) << "\n" << mk_ll_pp(q, m) << "\n";);
         TRACE("internalize_quantifier", tout << mk_pp(q, m) << "\n";);
         SASSERT(is_lambda(q));
         if (e_internalized(q)) {
@@ -614,6 +625,7 @@ namespace smt {
        \brief Internalize gates and (uninterpreted and equality) predicates.
     */
     void context::internalize_formula_core(app * n, bool gate_ctx) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_formular_core:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!b_internalized(n));
         SASSERT(!e_internalized(n));
 
@@ -622,6 +634,7 @@ namespace smt {
         bool _is_gate  = is_gate(m, n) || m.is_not(n);
         // process args
         for (expr * arg : *n) {
+            IF_VERBOSE(5, verbose_stream() << "\ninternalize_formular_core: call rec with is_gate: " << _is_gate << "\n" << mk_pp(arg, m) << "\n" << mk_ll_pp(arg, m) << "\n";);
             internalize_rec(arg, _is_gate);
         }
         
@@ -825,6 +838,7 @@ namespace smt {
        \brief Internalize an if-then-else term.
     */
     void context::internalize_ite_term(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_ite_term:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!e_internalized(n));
         expr * c  = n->get_arg(0);
         expr * t  = n->get_arg(1);
@@ -880,9 +894,11 @@ namespace smt {
        \brief Internalize an uninterpreted function application or constant.
     */
     void context::internalize_uninterpreted(app * n) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_uninterpreted:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!e_internalized(n));
         // process args
         for (expr * arg : *n) {
+            IF_VERBOSE(5, verbose_stream() << "\ninternalize_uninterpreted: calling rec with false\n" << mk_pp(arg, m) << "\n" << mk_ll_pp(arg, m) << "\n";);
             internalize_rec(arg, false);
             SASSERT(e_internalized(arg));
         }
@@ -1659,6 +1675,7 @@ namespace smt {
     }
 
     void context::mk_iff_cnstr(app * n, bool sign) {
+        IF_VERBOSE(5, verbose_stream() << "\nmk_iff_cnstr:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         if (n->get_num_args() != 2) 
             throw default_exception("formula has not been simplified");
         literal l  = get_literal(n);

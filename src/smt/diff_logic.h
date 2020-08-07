@@ -501,7 +501,7 @@ public:
         edge_id new_id = m_edges.size();
         m_edges.push_back(edge(source, target, weight, m_timestamp, ex));
         m_activity.push_back(0);
-        IF_VERBOSE(5, verbose_stream() << "DL: add_edge: "; display_edge(verbose_stream(), m_edges.back()););
+        IF_VERBOSE(5, verbose_stream() << "DL Graph: add_edge: "; display_edge(verbose_stream(), m_edges.back()););
         TRACE("dl_bug", tout << "creating edge:\n"; display_edge(tout, m_edges.back()););
         m_out_edges[source].push_back(new_id);
         m_in_edges[target].push_back(new_id);
