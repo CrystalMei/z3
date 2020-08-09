@@ -304,6 +304,7 @@ namespace smt {
         IF_VERBOSE(5, verbose_stream() << "assert_default: expr #" << n->get_id() << ":\n" << mk_pp(n, m) << "\n";);
         internalize(n, true);
         literal l = get_literal(n);
+        IF_VERBOSE(5, verbose_stream() << "literal " << get_literal(n) << ":\n" << mk_pp(n, m) << "\n";);
         if (l == false_literal) {
             set_conflict(mk_justification(justification_proof_wrapper(*this, pr)));
         }
@@ -373,6 +374,7 @@ namespace smt {
 
     void context::internalize_rec(expr * n, bool gate_ctx) {
         IF_VERBOSE(5, verbose_stream() << "\ninternalize_rec with gate_ctx(" << gate_ctx << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "literal " << get_literal(n) << ":\n" << mk_pp(n, m) << "\n";);
         TRACE("internalize", tout << "internalizing:\n" << mk_pp(n, m) << "\n";);
         TRACE("internalize_bug", tout << "internalizing:\n" << mk_bounded_pp(n, m) << "\n";);
         if (is_var(n)) {
@@ -397,6 +399,7 @@ namespace smt {
     */
     void context::internalize_formula(expr * n, bool gate_ctx) {
         IF_VERBOSE(5, verbose_stream() << "\ninternalize_formula: with gate_ctx(" << gate_ctx << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "formula: " << m.is_not(n) << "\n";);
         TRACE("internalize_bug", tout << "internalize formula: #" << n->get_id() << ", gate_ctx: " << gate_ctx << "\n" << mk_pp(n, m) << "\n";);
         SASSERT(m.is_bool(n));
         if (m.is_true(n) || m.is_false(n))

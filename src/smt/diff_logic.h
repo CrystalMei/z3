@@ -501,7 +501,7 @@ public:
         edge_id new_id = m_edges.size();
         m_edges.push_back(edge(source, target, weight, m_timestamp, ex));
         m_activity.push_back(0);
-        IF_VERBOSE(5, verbose_stream() << "DL Graph: add_edge: "; display_edge(verbose_stream(), m_edges.back()););
+        IF_VERBOSE(5, verbose_stream() << "DL Graph: add_edge #" << new_id << ": "; display_edge(verbose_stream(), m_edges.back()););
         TRACE("dl_bug", tout << "creating edge:\n"; display_edge(tout, m_edges.back()););
         m_out_edges[source].push_back(new_id);
         m_in_edges[target].push_back(new_id);
@@ -513,23 +513,26 @@ public:
     // The method assumes the graph is feasible before the invocation.
 
     bool enable_edge(edge_id id) {
-        edge& e = m_edges[id];
-        IF_VERBOSE(5, verbose_stream() << "DL Graph: try enable edge #" << id << ": "; display_edge(verbose_stream(), e););
-        SASSERT(is_feasible_dbg());
-        bool r = true;
-        if (!e.is_enabled()) {
-            e.enable(m_timestamp);
-            IF_VERBOSE(5, verbose_stream() << "DL Graph: enable disabled edge #" << id << ": "; display_edge(verbose_stream(), e); verbose_stream() << "\n";);
-            m_last_enabled_edge = id;
-            m_timestamp++;
-            if (!is_feasible(e)) {
-                r = make_feasible(id);
+        if (id >= 0) {
+            edge& e = m_edges[id];
+            IF_VERBOSE(5, verbose_stream() << "DL Graph: try enable edge #" << id << ": "; display_edge(verbose_stream(), e););
+            SASSERT(is_feasible_dbg());
+            bool r = true;
+            if (!e.is_enabled()) {
+                e.enable(m_timestamp);
+                IF_VERBOSE(5, verbose_stream() << "DL Graph: enable disabled edge #" << id << ": "; display_edge(verbose_stream(), e); verbose_stream() << "\n";);
+                m_last_enabled_edge = id;
+                m_timestamp++;
+                if (!is_feasible(e)) {
+                    r = make_feasible(id);
+                }
+                SASSERT(check_invariant());
+                SASSERT(!r || is_feasible_dbg()); 
+                m_enabled_edges.push_back(id);
             }
-            SASSERT(check_invariant());
-            SASSERT(!r || is_feasible_dbg()); 
-            m_enabled_edges.push_back(id);
+            return r;
         }
-        return r;
+        return true;
     }
 
 

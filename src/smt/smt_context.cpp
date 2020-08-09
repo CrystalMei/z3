@@ -3107,7 +3107,9 @@ namespace smt {
                 expr * f   = m_asserted_formulas.get_formula(qhead);
                 proof * pr = m_asserted_formulas.get_formula_proof(qhead);
                 SASSERT(!pr || f == m.get_fact(pr));
+                IF_VERBOSE(5, verbose_stream() << "\nbefore internalize_assertion:\n" << mk_pp(f, m) << "\n";);
                 internalize_assertion(f, pr, 0);
+                IF_VERBOSE(5, verbose_stream() << "assignment after one internalize_assertion:\n"; display_assignment(verbose_stream()); verbose_stream() << "\n";);
                 qhead++;
             }
             m_asserted_formulas.commit();
