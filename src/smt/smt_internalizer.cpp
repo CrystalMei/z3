@@ -372,7 +372,7 @@ namespace smt {
     }
 
     void context::internalize_rec(expr * n, bool gate_ctx) {
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_rec:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_rec with gate_ctx(" << gate_ctx << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         TRACE("internalize", tout << "internalizing:\n" << mk_pp(n, m) << "\n";);
         TRACE("internalize_bug", tout << "internalizing:\n" << mk_bounded_pp(n, m) << "\n";);
         if (is_var(n)) {
@@ -396,7 +396,7 @@ namespace smt {
        \brief Internalize the given formula into the logical context.
     */
     void context::internalize_formula(expr * n, bool gate_ctx) {
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_formula:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_formula: with gate_ctx(" << gate_ctx << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         TRACE("internalize_bug", tout << "internalize formula: #" << n->get_id() << ", gate_ctx: " << gate_ctx << "\n" << mk_pp(n, m) << "\n";);
         SASSERT(m.is_bool(n));
         if (m.is_true(n) || m.is_false(n))
@@ -454,7 +454,7 @@ namespace smt {
        \brief Internalize an equality.
     */
     void context::internalize_eq(app * n, bool gate_ctx) {
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_eq:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_eq: with gate_ctx(" << gate_ctx << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!b_internalized(n));
         SASSERT(m.is_eq(n));
         internalize_formula_core(n, gate_ctx);
@@ -473,7 +473,7 @@ namespace smt {
        \brief Internalize distinct constructor.
     */
     void context::internalize_distinct(app * n, bool gate_ctx) {
-        TRACE("distinct", tout << "internalizing distinct: " << mk_pp(n, m) << "\n";);
+        TRACE("distinct", tout << "internalizing distinct with gate_ctx(" << gate_ctx << "):\n"  << mk_pp(n, m) << "\n";);
         SASSERT(!b_internalized(n));
         SASSERT(m.is_distinct(n));
         bool_var v = mk_bool_var(n);
@@ -501,13 +501,13 @@ namespace smt {
         that can internalize n.
     */
     bool context::internalize_theory_atom(app * n, bool gate_ctx) {
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_theory_atom: #" << n->get_id() << "\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_theory_atom: #" << n->get_id() << " with gate_ctx(" << gate_ctx << "):\n"  << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!b_internalized(n));
         theory * th  = m_theories.get_plugin(n->get_family_id());
         TRACE("datatype_bug", tout << "internalizing theory atom:\n" << mk_pp(n, m) << "\n";);
         if (!th || !th->internalize_atom(n, gate_ctx))
             return false;
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_theory_atom: #" << n->get_id() << " internalization succeeded\n" << mk_pp(n, m) << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_theory_atom: #" << n->get_id() << "  with gate_ctx(" << gate_ctx << ") internalization succeeded\n" << mk_pp(n, m) << "\n\n";);
         SASSERT(b_internalized(n));
         TRACE("internalize_theory_atom", tout << "internalizing theory atom: #" << n->get_id() << "\n";);
         bool_var v        = get_bool_var(n);
@@ -572,7 +572,7 @@ namespace smt {
        context. 
     */
     void context::internalize_quantifier(quantifier * q, bool gate_ctx) {
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_quantifier:\n" << mk_pp(q, m) << "\n" << mk_ll_pp(q, m) << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_quantifier with gate_ctx(" << gate_ctx << "):\n" << mk_pp(q, m) << "\n" << mk_ll_pp(q, m) << "\n";);
         TRACE("internalize_quantifier", tout << mk_pp(q, m) << "\n";);
         CTRACE("internalize_quantifier_zero", q->get_weight() == 0, tout << mk_pp(q, m) << "\n";);
         SASSERT(gate_ctx); // limitation of the current implementation
@@ -625,7 +625,7 @@ namespace smt {
        \brief Internalize gates and (uninterpreted and equality) predicates.
     */
     void context::internalize_formula_core(app * n, bool gate_ctx) {
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_formular_core:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_formular_core with gate_ctx(" << gate_ctx << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!b_internalized(n));
         SASSERT(!e_internalized(n));
 
@@ -918,7 +918,7 @@ namespace smt {
         //SASSERT(!m.is_not(n));
         unsigned id = n->get_id();
         bool_var v  = m_b_internalized_stack.size();
-        IF_VERBOSE(5, verbose_stream() << "\nmk_bool_var: creating boolean variable: " << v << " for:\n" << mk_pp(n, m) << ", its ID: " << n->get_id() << "\n\n";);  
+        IF_VERBOSE(5, verbose_stream() << "\nmk_bool_var: creating boolean variable: " << v << " with ast-ID #" << n->get_id() << ":\n" << mk_pp(n, m) << "\n";);  
         TRACE("mk_bool_var", tout << "creating boolean variable: " << v << " for:\n" << mk_pp(n, m) << " " << n->get_id() << "\n";);
         TRACE("mk_var_bug", tout << "mk_bool: " << v << "\n";);                
         set_bool_var(id, v);
@@ -951,6 +951,7 @@ namespace smt {
         m_trail_stack.push_back(&m_mk_bool_var_trail);
         m_stats.m_num_mk_bool_var++;
         SASSERT(check_bool_var_vector_sizes());
+        IF_VERBOSE(5, verbose_stream() << "mk_bool_var: created boolean variable: " << v << " with lbool(" << get_assignment(n) << "):\n" << mk_pp(n, m) << "\n\n";);
         return v;
     }
     

@@ -1306,6 +1306,7 @@ namespace smt {
             bool_var v = l.var();
             bool_var_data & d = get_bdata(v);
             lbool val  = get_assignment(v);
+            IF_VERBOSE(5, verbose_stream () << "propagate_atoms: #" << bool_var2expr(v)->get_id() << "\n" << mk_pp(bool_var2expr(v), m) << "\n";);
             CTRACE("propagate_atoms", v == 13, tout << "propagating atom, #" << bool_var2expr(v)->get_id() << ", is_enode(): " << d.is_enode()
                   << " tag: " << (d.is_eq()?"eq":"") << (d.is_theory_atom()?"th":"") << (d.is_quantifier()?"q":"") << " " << l << "\n";);
             SASSERT(val != l_undef);
@@ -1545,6 +1546,7 @@ namespace smt {
                     m_atom_propagation_queue.push_back(literal(v, val == l_false));
             }
         }
+        IF_VERBOSE(5, verbose_stream() << "propagate_relevancy: marking as relevant:\n" << mk_bounded_pp(n, m) << "\nscope_level: " << m_scope_lvl << "\n";);
         TRACE("propagate_relevancy", tout << "marking as relevant:\n" << mk_bounded_pp(n, m) << " " << m_scope_lvl << "\n";);
         m_case_split_queue->relevant_eh(n);
 
@@ -1676,6 +1678,7 @@ namespace smt {
        congruences cannot be retracted to a consistent state.
      */
     bool context::propagate() {
+        IF_VERBOSE(5, verbose_stream() << "propagating... " << m_qhead << ":" << m_assigned_literals.size() << "\n";);
         TRACE("propagate", tout << "propagating... " << m_qhead << ":" << m_assigned_literals.size() << "\n";);
         while (true) {
             if (inconsistent())
@@ -3504,11 +3507,14 @@ namespace smt {
         do {
             pop_to_base_lvl();
             expr_ref_vector asms(m, num_assumptions, assumptions);
+            // IF_VERBOSE(5, verbose_stream() << "assignment before internalize_assertions():\n"; display_assignment(verbose_stream()); verbose_stream() << "\n";);
             internalize_assertions();
+            IF_VERBOSE(5, verbose_stream() << "assignment after internalize_assertions():\n"; display_assignment(verbose_stream()); verbose_stream() << "\n";);
             add_theory_assumptions(asms);                
             TRACE("unsat_core_bug", tout << asms << "\n";);        
             init_assumptions(asms);
             TRACE("before_search", display(tout););
+            // IF_VERBOSE(5, verbose_stream() << "assignment before search():\n"; display_assignment(verbose_stream()); );
             r = search();
             r = mk_unsat_core(r);        
         }

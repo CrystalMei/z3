@@ -227,6 +227,7 @@ namespace smt {
             for (literal lit : m_assigned_literals) {
                 display_literal(out, lit);
                 if (!is_relevant(lit)) out << " n ";
+                out << " - " << get_assignment(lit);
                 out << ": ";
                 display_verbose(out, m, 1, &lit, m_bool_var2expr.c_ptr());
                 out << "\n";

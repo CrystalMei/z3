@@ -514,10 +514,12 @@ public:
 
     bool enable_edge(edge_id id) {
         edge& e = m_edges[id];
+        IF_VERBOSE(5, verbose_stream() << "DL Graph: try enable edge #" << id << ": "; display_edge(verbose_stream(), e););
         SASSERT(is_feasible_dbg());
         bool r = true;
         if (!e.is_enabled()) {
             e.enable(m_timestamp);
+            IF_VERBOSE(5, verbose_stream() << "DL Graph: enable disabled edge #" << id << ": "; display_edge(verbose_stream(), e); verbose_stream() << "\n";);
             m_last_enabled_edge = id;
             m_timestamp++;
             if (!is_feasible(e)) {
