@@ -518,6 +518,7 @@ void asserted_formulas::propagate_values() {
         m_expr2depth.reset();
         m_scoped_substitution.push();
         unsigned prop = num_prop;
+        // IF_VERBOSE(5, verbose_stream() << "propagate_values:\n"; display(verbose_stream() << "before:\n"); verbose_stream() << "\n");
         TRACE("propagate_values", display(tout << "before:\n"););
         unsigned i  = m_qhead;
         unsigned sz = m_formulas.size();
@@ -528,6 +529,7 @@ void asserted_formulas::propagate_values() {
         m_scoped_substitution.pop(1);
         m_expr2depth.reset();
         m_scoped_substitution.push();
+        // IF_VERBOSE(5, verbose_stream() << "propagate_values:\n"; display(verbose_stream() << "middle:\n"); verbose_stream() << "\n");
         TRACE("propagate_values", tout << "middle:\n"; display(tout););
         i = sz;
         while (i > m_qhead) {
@@ -536,10 +538,12 @@ void asserted_formulas::propagate_values() {
         }
         m_scoped_substitution.pop(1);
         flush_cache();
+        // IF_VERBOSE(5, verbose_stream() << "propagate_values:\n"; display(verbose_stream() << "after:\n"); verbose_stream() << "\n");
         TRACE("propagate_values", tout << "after:\n"; display(tout););
         delta_prop = prop - num_prop;
         num_prop = prop;
     }
+    // IF_VERBOSE(5, verbose_stream() << "asserted_formulas: " << num_prop << "\n");
     TRACE("asserted_formulas", tout << num_prop << "\n";);
     if (num_prop > 0)
         m_reduce_asserted_formulas();

@@ -399,7 +399,6 @@ namespace smt {
     */
     void context::internalize_formula(expr * n, bool gate_ctx) {
         IF_VERBOSE(5, verbose_stream() << "\ninternalize_formula: with gate_ctx(" << gate_ctx << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
-        IF_VERBOSE(5, verbose_stream() << "formula: " << m.is_not(n) << "\n";);
         TRACE("internalize_bug", tout << "internalize formula: #" << n->get_id() << ", gate_ctx: " << gate_ctx << "\n" << mk_pp(n, m) << "\n";);
         SASSERT(m.is_bool(n));
         if (m.is_true(n) || m.is_false(n))

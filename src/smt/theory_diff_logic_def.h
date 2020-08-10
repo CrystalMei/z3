@@ -384,13 +384,15 @@ final_check_status theory_diff_logic<Ext>::final_check_eh() {
     }
 
     TRACE("arith_final", display(tout); );
-    if (!is_consistent())
+    if (!is_consistent()) {
         IF_VERBOSE(5, verbose_stream() << "DL: final_check - not consistent, continue\n";);
         return FC_CONTINUE;
+    }
     SASSERT(is_consistent());
-    if (assume_eqs(m_var_value_table))
+    if (assume_eqs(m_var_value_table)) {
         IF_VERBOSE(5, verbose_stream() << "DL: final_check - assume_eqs, continue\n";);
         return FC_CONTINUE;
+    }
     if (m_non_diff_logic_exprs) {
         IF_VERBOSE(5, verbose_stream() << "DL: final_check - non diff logic exprs, giveup\n";);
         return FC_GIVEUP; 
