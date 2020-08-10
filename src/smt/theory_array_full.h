@@ -55,7 +55,7 @@ namespace smt {
 
 
         bool internalize_term(app * term) override;
-        bool internalize_atom(app * atom, bool gate_ctx) override;
+        bool internalize_atom(app * atom, bool gate_ctx, bool not_flag = false) override;
         void pop_scope_eh(unsigned num_scopes) override;
         theory_var mk_var(enode * n) override;
         void relevant_eh(app * n) override;

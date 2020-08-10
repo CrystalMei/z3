@@ -133,7 +133,7 @@ namespace smt {
     }
                           
     template<typename Ext>
-    bool theory_dense_diff_logic<Ext>::internalize_atom(app * n, bool gate_ctx) {
+    bool theory_dense_diff_logic<Ext>::internalize_atom(app * n, bool gate_ctx, bool not_flag) {
         IF_VERBOSE(5, verbose_stream() << "DDL: internalize_atom: " << mk_pp(n, m) << "\n";);
         if (memory::above_high_watermark()) {
             found_non_diff_logic_expr(n); // little hack... TODO: change to no_memory and return l_undef if SAT

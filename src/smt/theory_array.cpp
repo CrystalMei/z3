@@ -230,7 +230,7 @@ namespace smt {
     }
 
 
-    bool theory_array::internalize_atom(app * atom, bool) {
+    bool theory_array::internalize_atom(app * atom, bool, bool not_flag) {
         return internalize_term(atom);
     }
 

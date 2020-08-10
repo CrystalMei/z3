@@ -133,7 +133,7 @@ namespace smt {
         return false;
     }
 
-    bool theory_special_relations::internalize_atom(app * atm, bool gate_ctx) {
+    bool theory_special_relations::internalize_atom(app * atm, bool gate_ctx, bool not_flag) {
         SASSERT(m_util.is_special_relation(atm));
         relation* r = 0;
         ast_manager& m = get_manager();

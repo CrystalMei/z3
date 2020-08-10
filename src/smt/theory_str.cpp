@@ -322,7 +322,7 @@ namespace smt {
         assert_axiom(axiom);
     }
 
-    bool theory_str::internalize_atom(app * atom, bool gate_ctx) {
+    bool theory_str::internalize_atom(app * atom, bool gate_ctx, bool not_flag) {
         return internalize_term(atom);
     }
 

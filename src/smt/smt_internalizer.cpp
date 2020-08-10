@@ -190,7 +190,7 @@ namespace smt {
             to_app(e)->get_family_id() == m.get_basic_family_id();
     }
 
-    void context::internalize_deep(expr* const* exprs, unsigned num_exprs) {
+    void context::internalize_deep(expr* const* exprs, unsigned num_exprs, bool not_flag) {
         ts_todo.reset();
         for (unsigned i = 0; i < num_exprs; ++i) {
             expr * n = exprs[i];
@@ -210,12 +210,12 @@ namespace smt {
         for (auto & kv : sorted_exprs) {
             expr* e = kv.first;
             SASSERT(should_internalize_rec(e));
-            internalize_rec(e, kv.second);
+            internalize_rec(e, kv.second, not_flag);
         }
     }
-    void context::internalize_deep(expr* n) {
+    void context::internalize_deep(expr* n, bool not_flag) {
         expr * v[1] = { n };
-        internalize_deep(v, 1);
+        internalize_deep(v, 1, not_flag);
     }
  
     /**
@@ -223,7 +223,7 @@ namespace smt {
        
        \remark pr is 0 if proofs are disabled.
     */
-    void context::internalize_assertion(expr * n, proof * pr, unsigned generation) {
+    void context::internalize_assertion(expr * n, proof * pr, unsigned generation, bool not_flag) {
         IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         TRACE("internalize_assertion", tout << mk_pp(n, m) << "\n";); 
         TRACE("internalize_assertion_ll", tout << mk_ll_pp(n, m) << "\n";); 
@@ -231,14 +231,14 @@ namespace smt {
         TRACE("incompleteness_bug", tout << "[internalize-assertion]: #" << n->get_id() << "\n";);
         flet<unsigned> l(m_generation, generation);
         m_stats.m_max_generation = std::max(m_generation, m_stats.m_max_generation);
-        internalize_deep(n);
+        internalize_deep(n, not_flag);
         SASSERT(m.is_bool(n));
         if (is_gate(m, n)) {
             switch(to_app(n)->get_decl_kind()) {
             case OP_AND: {
                 for (expr * arg : *to_app(n)) {
                     IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_AND - calling rec with true\n" << mk_pp(arg, m) << "\n" << mk_ll_pp(arg, m) << "\n";);
-                    internalize_rec(arg, true);
+                    internalize_rec(arg, true, not_flag);
                     literal lit = get_literal(arg);
                     mk_root_clause(1, &lit, pr);
                 }
@@ -248,7 +248,7 @@ namespace smt {
                 literal_buffer lits;
                 for (expr * arg : *to_app(n)) { 
                     IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_OR - calling rec with true\n" << mk_pp(arg, m) << "\n" << mk_ll_pp(arg, m) << "\n";);
-                    internalize_rec(arg, true);
+                    internalize_rec(arg, true, not_flag);
                     lits.push_back(get_literal(arg));
                 }
                 mk_root_clause(lits.size(), lits.c_ptr(), pr);
@@ -259,9 +259,9 @@ namespace smt {
                 expr * lhs = to_app(n)->get_arg(0);
                 expr * rhs = to_app(n)->get_arg(1);
                 IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_EQ - calling rec with true - lhs\n" << mk_pp(lhs, m) << "\n" << mk_ll_pp(lhs, m) << "\n";);
-                internalize_rec(lhs, true);
+                internalize_rec(lhs, true, not_flag);
                 IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_EQ - calling rec with true - rhs\n" << mk_pp(rhs, m) << "\n" << mk_ll_pp(rhs, m) << "\n";);
-                internalize_rec(rhs, true);
+                internalize_rec(rhs, true, not_flag);
                 literal l1 = get_literal(lhs);
                 literal l2 = get_literal(rhs);
                 mk_root_clause(l1, ~l2, pr);
@@ -273,11 +273,11 @@ namespace smt {
                 expr * t = to_app(n)->get_arg(1);
                 expr * e = to_app(n)->get_arg(2);
                 IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_ITE - calling rec with true - c\n" << mk_pp(c, m) << "\n" << mk_ll_pp(c, m) << "\n";);
-                internalize_rec(c, true);
+                internalize_rec(c, true, not_flag);
                 IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_ITE - calling rec with true - t\n" << mk_pp(t, m) << "\n" << mk_ll_pp(t, m) << "\n";);
-                internalize_rec(t, true);
+                internalize_rec(t, true, not_flag);
                 IF_VERBOSE(5, verbose_stream() << "\ninternalize_assertion: OP_ITE - calling rec with true - e\n" << mk_pp(e, m) << "\n" << mk_ll_pp(e, m) << "\n";);
-                internalize_rec(e, true);
+                internalize_rec(e, true, not_flag);
                 literal cl = get_literal(c);
                 literal tl = get_literal(t);
                 literal el = get_literal(e);
@@ -292,17 +292,17 @@ namespace smt {
             mark_as_relevant(n);
         }
         else if (m.is_distinct(n)) {
-            assert_distinct(to_app(n), pr);
+            assert_distinct(to_app(n), pr, not_flag);
             mark_as_relevant(n);
         }
         else {
-            assert_default(n, pr);
+            assert_default(n, pr, not_flag);
         }
     }
 
-    void context::assert_default(expr * n, proof * pr) {
+    void context::assert_default(expr * n, proof * pr, bool not_flag) {
         IF_VERBOSE(5, verbose_stream() << "assert_default: expr #" << n->get_id() << ":\n" << mk_pp(n, m) << "\n";);
-        internalize(n, true);
+        internalize(n, true, not_flag);
         literal l = get_literal(n);
         IF_VERBOSE(5, verbose_stream() << "literal " << get_literal(n) << ":\n" << mk_pp(n, m) << "\n";);
         if (l == false_literal) {
@@ -318,11 +318,11 @@ namespace smt {
 
 #define DISTINCT_SZ_THRESHOLD 32
 
-    void context::assert_distinct(app * n, proof * pr) {
+    void context::assert_distinct(app * n, proof * pr, bool not_flag) {
         TRACE("assert_distinct", tout << mk_pp(n, m) << "\n";);
         unsigned num_args = n->get_num_args();
         if (num_args == 0 || num_args <= DISTINCT_SZ_THRESHOLD || m.proofs_enabled()) {
-            assert_default(n, pr);
+            assert_default(n, pr, not_flag);
             return;
         }
         sort * s = m.get_sort(n->get_arg(0));
@@ -335,21 +335,21 @@ namespace smt {
             e->mark_as_interpreted();
             app_ref eq(m.mk_eq(fapp, val), m);
             TRACE("assert_distinct", tout << "eq: " << mk_pp(eq, m) << "\n";);
-            assert_default(eq, nullptr);
+            assert_default(eq, nullptr, not_flag);
             mark_as_relevant(eq.get());
             // TODO: we may want to hide the auxiliary values val and the function f from the model.
         }
     }
 
-    void context::internalize(expr * n, bool gate_ctx, unsigned generation) {
+    void context::internalize(expr * n, bool gate_ctx, unsigned generation, bool not_flag) {
         flet<unsigned> l(m_generation, generation);
         m_stats.m_max_generation = std::max(m_generation, m_stats.m_max_generation);
-        internalize_rec(n, gate_ctx);
+        internalize_rec(n, gate_ctx, not_flag);
     }
 
-    void context::ensure_internalized(expr* e) {
+    void context::ensure_internalized(expr* e, bool not_flag) {
         if (!e_internalized(e)) {
-            internalize(e, false);
+            internalize(e, false, not_flag);
         }
     }
 
@@ -358,22 +358,22 @@ namespace smt {
        
        - gate_ctx is true if the expression is in the context of a logical gate.
     */
-    void context::internalize(expr * n, bool gate_ctx) {
-        internalize_deep(n);
-        internalize_rec(n, gate_ctx);
+    void context::internalize(expr * n, bool gate_ctx, bool not_flag) {
+        internalize_deep(n, not_flag);
+        internalize_rec(n, gate_ctx, not_flag);
     }
 
-    void context::internalize(expr* const* exprs, unsigned num_exprs, bool gate_ctx) {
+    void context::internalize(expr* const* exprs, unsigned num_exprs, bool gate_ctx, bool not_flag) {
         IF_VERBOSE(5, verbose_stream() << "\nsmt_internalize:\n\n";);
-        internalize_deep(exprs, num_exprs);
+        internalize_deep(exprs, num_exprs, not_flag);
         for (unsigned i = 0; i < num_exprs; ++i) {
             IF_VERBOSE(5, verbose_stream() << "\nsmt_internalize: #" << i << "\n" << mk_pp(exprs[i], m) << "\n";);
-            internalize_rec(exprs[i], gate_ctx);
+            internalize_rec(exprs[i], gate_ctx, not_flag);
         }
     }
 
-    void context::internalize_rec(expr * n, bool gate_ctx) {
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_rec with gate_ctx(" << gate_ctx << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
+    void context::internalize_rec(expr * n, bool gate_ctx, bool not_flag) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_rec with gate_ctx(" << gate_ctx << ") and not_flag(" << not_flag << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         IF_VERBOSE(5, verbose_stream() << "literal " << get_literal(n) << ":\n" << mk_pp(n, m) << "\n";);
         TRACE("internalize", tout << "internalizing:\n" << mk_pp(n, m) << "\n";);
         TRACE("internalize_bug", tout << "internalizing:\n" << mk_bounded_pp(n, m) << "\n";);
@@ -382,23 +382,23 @@ namespace smt {
         }
         if (m.is_bool(n)) {
             SASSERT(is_quantifier(n) || is_app(n));
-            internalize_formula(n, gate_ctx);
+            internalize_formula(n, gate_ctx, not_flag);
         }
         else if (is_lambda(n)) {
-            internalize_lambda(to_quantifier(n));
+            internalize_lambda(to_quantifier(n), not_flag);
         }
         else {
             SASSERT(is_app(n));
             SASSERT(!gate_ctx);
-            internalize_term(to_app(n));
+            internalize_term(to_app(n), not_flag);
         }
     }
 
     /**
        \brief Internalize the given formula into the logical context.
     */
-    void context::internalize_formula(expr * n, bool gate_ctx) {
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_formula: with gate_ctx(" << gate_ctx << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
+    void context::internalize_formula(expr * n, bool gate_ctx, bool not_flag) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_formula: with gate_ctx(" << gate_ctx << ") and not_flag(" << not_flag << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         IF_VERBOSE(5, verbose_stream() << "formula: " << m.is_not(n) << "\n";);
         TRACE("internalize_bug", tout << "internalize formula: #" << n->get_id() << ", gate_ctx: " << gate_ctx << "\n" << mk_pp(n, m) << "\n";);
         SASSERT(m.is_bool(n));
@@ -408,7 +408,7 @@ namespace smt {
         if (m.is_not(n) && gate_ctx) {
             // a boolean variable does not need to be created if n a NOT gate is in
             // the context of a gate.
-            internalize_rec(to_app(n)->get_arg(0), true);
+            internalize_rec(to_app(n)->get_arg(0), true, ~not_flag);
             return;
         }
 
@@ -442,28 +442,29 @@ namespace smt {
         }
 
         if (m.is_eq(n) && !m.is_iff(n))
-            internalize_eq(to_app(n), gate_ctx);
+            internalize_eq(to_app(n), gate_ctx, not_flag);
         else if (m.is_distinct(n))
-            internalize_distinct(to_app(n), gate_ctx);
-        else if (is_app(n) && internalize_theory_atom(to_app(n), gate_ctx))
+            internalize_distinct(to_app(n), gate_ctx, not_flag);
+        else if (is_app(n) && internalize_theory_atom(to_app(n), gate_ctx, not_flag))
             return;
         else if (is_quantifier(n)) 
-            internalize_quantifier(to_quantifier(n), gate_ctx);
+            internalize_quantifier(to_quantifier(n), gate_ctx, not_flag);
         else
-            internalize_formula_core(to_app(n), gate_ctx);
+            internalize_formula_core(to_app(n), gate_ctx, not_flag);
     }
 
     /**
        \brief Internalize an equality.
     */
-    void context::internalize_eq(app * n, bool gate_ctx) {
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_eq: with gate_ctx(" << gate_ctx << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
+    void context::internalize_eq(app * n, bool gate_ctx, bool not_flag) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_eq: with gate_ctx(" << gate_ctx << ") and not_flag(" << not_flag << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!b_internalized(n));
         SASSERT(m.is_eq(n));
-        internalize_formula_core(n, gate_ctx);
+        internalize_formula_core(n, gate_ctx, not_flag);
         bool_var v        = get_bool_var(n);
         bool_var_data & d = get_bdata(v);
         d.set_eq_flag();
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_eq with literal: " << literal(v, false) << "\n" << mk_pp(n, m) << "\n";);
         TRACE("internalize", tout << mk_pp(n, m) << " " << literal(v, false) << "\n";);
         
         sort * s    = m.get_sort(n->get_arg(0));
@@ -475,14 +476,14 @@ namespace smt {
     /**
        \brief Internalize distinct constructor.
     */
-    void context::internalize_distinct(app * n, bool gate_ctx) {
-        TRACE("distinct", tout << "internalizing distinct with gate_ctx(" << gate_ctx << "):\n"  << mk_pp(n, m) << "\n";);
+    void context::internalize_distinct(app * n, bool gate_ctx, bool not_flag) {
+        TRACE("distinct", tout << "internalizing distinct with gate_ctx(" << gate_ctx << ") and not_flag(" << not_flag << "):\n"  << mk_pp(n, m) << "\n";);
         SASSERT(!b_internalized(n));
         SASSERT(m.is_distinct(n));
         bool_var v = mk_bool_var(n);
         literal l(v);
         expr_ref def(m.mk_distinct_expanded(n->get_num_args(), n->get_args()), m);
-        internalize_rec(def, true);
+        internalize_rec(def, true, not_flag);
         literal l_def = get_literal(def);
         mk_gate_clause(~l, l_def);
         mk_gate_clause(l, ~l_def);
@@ -503,14 +504,14 @@ namespace smt {
         The application can be internalize as a theory atom, if there is a theory (plugin)
         that can internalize n.
     */
-    bool context::internalize_theory_atom(app * n, bool gate_ctx) {
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_theory_atom: #" << n->get_id() << " with gate_ctx(" << gate_ctx << "):\n"  << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
+    bool context::internalize_theory_atom(app * n, bool gate_ctx, bool not_flag) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_theory_atom: #" << n->get_id() << " with gate_ctx(" << gate_ctx << ") and not_flag(" << not_flag << "):\n"  << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!b_internalized(n));
         theory * th  = m_theories.get_plugin(n->get_family_id());
         TRACE("datatype_bug", tout << "internalizing theory atom:\n" << mk_pp(n, m) << "\n";);
-        if (!th || !th->internalize_atom(n, gate_ctx))
+        if (!th || !th->internalize_atom(n, gate_ctx, not_flag))
             return false;
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_theory_atom: #" << n->get_id() << "  with gate_ctx(" << gate_ctx << ") internalization succeeded\n" << mk_pp(n, m) << "\n\n";);
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_theory_atom: #" << n->get_id() << "  with gate_ctx(" << gate_ctx << ") and not_flag(" << not_flag << ") internalization succeeded\n" << mk_pp(n, m) << "\n\n";);
         SASSERT(b_internalized(n));
         TRACE("internalize_theory_atom", tout << "internalizing theory atom: #" << n->get_id() << "\n";);
         bool_var v        = get_bool_var(n);
@@ -574,8 +575,8 @@ namespace smt {
        \brief Internalize the given quantifier into the logical
        context. 
     */
-    void context::internalize_quantifier(quantifier * q, bool gate_ctx) {
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_quantifier with gate_ctx(" << gate_ctx << "):\n" << mk_pp(q, m) << "\n" << mk_ll_pp(q, m) << "\n";);
+    void context::internalize_quantifier(quantifier * q, bool gate_ctx, bool not_flag) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_quantifier with gate_ctx(" << gate_ctx << ") and not_flag(" << not_flag << "):\n" << mk_pp(q, m) << "\n" << mk_ll_pp(q, m) << "\n";);
         TRACE("internalize_quantifier", tout << mk_pp(q, m) << "\n";);
         CTRACE("internalize_quantifier_zero", q->get_weight() == 0, tout << mk_pp(q, m) << "\n";);
         SASSERT(gate_ctx); // limitation of the current implementation
@@ -596,9 +597,9 @@ namespace smt {
         m_qmanager->add(q, generation);
     }
 
-    void context::internalize_lambda(quantifier * q) {
+    void context::internalize_lambda(quantifier * q, bool not_flag) {
         IF_VERBOSE(5, verbose_stream() << "\ninternalize_lambda:\n" << mk_pp(q, m) << "\n" << mk_ll_pp(q, m) << "\n";);
-        TRACE("internalize_quantifier", tout << mk_pp(q, m) << "\n";);
+        TRACE("internalize_lambda", tout << mk_pp(q, m) << "\n";);
         SASSERT(is_lambda(q));
         if (e_internalized(q)) {
             return;
@@ -617,8 +618,8 @@ namespace smt {
         quantifier_ref fa(m);
         expr * patterns[1] = { m.mk_pattern(lam_app) };
         fa = m.mk_forall(sz, q->get_decl_sorts(), q->get_decl_names(), eq, 0, m.lambda_def_qid(), symbol::null, 1, patterns);
-        internalize_quantifier(fa, true);
-        if (!e_internalized(lam_name)) internalize_uninterpreted(lam_name);
+        internalize_quantifier(fa, true, not_flag);
+        if (!e_internalized(lam_name)) internalize_uninterpreted(lam_name, not_flag);
         m_app2enode.setx(q->get_id(), get_enode(lam_name), nullptr);
         m_l_internalized_stack.push_back(q);
         m_trail_stack.push_back(&m_mk_lambda_trail);
@@ -627,8 +628,8 @@ namespace smt {
     /**
        \brief Internalize gates and (uninterpreted and equality) predicates.
     */
-    void context::internalize_formula_core(app * n, bool gate_ctx) {
-        IF_VERBOSE(5, verbose_stream() << "\ninternalize_formular_core with gate_ctx(" << gate_ctx << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
+    void context::internalize_formula_core(app * n, bool gate_ctx, bool not_flag) {
+        IF_VERBOSE(5, verbose_stream() << "\ninternalize_formular_core with gate_ctx(" << gate_ctx << ") and not_flag(" << not_flag << "):\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!b_internalized(n));
         SASSERT(!e_internalized(n));
 
@@ -638,7 +639,7 @@ namespace smt {
         // process args
         for (expr * arg : *n) {
             IF_VERBOSE(5, verbose_stream() << "\ninternalize_formular_core: call rec with is_gate: " << _is_gate << "\n" << mk_pp(arg, m) << "\n" << mk_ll_pp(arg, m) << "\n";);
-            internalize_rec(arg, _is_gate);
+            internalize_rec(arg, _is_gate, not_flag);
         }
         
         CTRACE("internalize_bug", b_internalized(n), tout << mk_ll_pp(n, m) << "\n";);
@@ -801,7 +802,7 @@ namespace smt {
     /**
        \brief Internalize the given term into the logical context.
     */
-    void context::internalize_term(app * n) {
+    void context::internalize_term(app * n, bool not_flag) {
         if (e_internalized(n)) {
             theory * th = m_theories.get_plugin(n->get_family_id());
             if (th != nullptr) {
@@ -817,20 +818,20 @@ namespace smt {
                 //   and a theory variable must be created for it.
                 enode * e = get_enode(n);
                 if (!th->is_attached_to_var(e))
-                    internalize_theory_term(n);
+                    internalize_theory_term(n, not_flag);
             }
             return;
         }
 
         if (m.is_term_ite(n)) {
-            internalize_ite_term(n);
+            internalize_ite_term(n, not_flag);
             return; // it is not necessary to apply sort constraint
         }
-        else if (internalize_theory_term(n)) {
+        else if (internalize_theory_term(n, not_flag)) {
             // skip
         }
         else {
-            internalize_uninterpreted(n);
+            internalize_uninterpreted(n, not_flag);
         }
         SASSERT(e_internalized(n));
         enode * e = get_enode(n);
@@ -840,7 +841,7 @@ namespace smt {
     /**
        \brief Internalize an if-then-else term.
     */
-    void context::internalize_ite_term(app * n) {
+    void context::internalize_ite_term(app * n, bool not_flag) {
         IF_VERBOSE(5, verbose_stream() << "\ninternalize_ite_term:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!e_internalized(n));
         expr * c  = n->get_arg(0);
@@ -852,11 +853,11 @@ namespace smt {
                  true /* suppress arguments, I don't want to apply CC on ite terms */,
                  false /* it is a term, so it should not be merged with true/false */,
                  false /* CC is not enabled */);
-        internalize_rec(c, true);
-        internalize_rec(t, false);
-        internalize_rec(e, false);        
-        internalize_rec(eq1, true);
-        internalize_rec(eq2, true);
+        internalize_rec(c, true, not_flag);
+        internalize_rec(t, false, not_flag);
+        internalize_rec(e, false, not_flag);        
+        internalize_rec(eq1, true, not_flag);
+        internalize_rec(eq2, true, not_flag);
         literal c_lit   = get_literal(c);
         literal eq1_lit = get_literal(eq1);
         literal eq2_lit = get_literal(eq2);
@@ -886,7 +887,7 @@ namespace smt {
         
         It may fail because there is no plugin or the plugin does not support it.
     */
-    bool context::internalize_theory_term(app * n) {
+    bool context::internalize_theory_term(app * n, bool not_flag) {
         theory * th  = m_theories.get_plugin(n->get_family_id());
         if (!th || !th->internalize_term(n))
             return false;
@@ -896,13 +897,13 @@ namespace smt {
     /**
        \brief Internalize an uninterpreted function application or constant.
     */
-    void context::internalize_uninterpreted(app * n) {
+    void context::internalize_uninterpreted(app * n, bool not_flag) {
         IF_VERBOSE(5, verbose_stream() << "\ninternalize_uninterpreted:\n" << mk_pp(n, m) << "\n" << mk_ll_pp(n, m) << "\n";);
         SASSERT(!e_internalized(n));
         // process args
         for (expr * arg : *n) {
             IF_VERBOSE(5, verbose_stream() << "\ninternalize_uninterpreted: calling rec with false\n" << mk_pp(arg, m) << "\n" << mk_ll_pp(arg, m) << "\n";);
-            internalize_rec(arg, false);
+            internalize_rec(arg, false, not_flag);
             SASSERT(e_internalized(arg));
         }
         

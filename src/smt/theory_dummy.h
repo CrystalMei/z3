@@ -32,7 +32,7 @@ namespace smt {
         void found_theory_expr();
 
     protected:
-        bool internalize_atom(app * atom, bool gate_ctx) override;
+        bool internalize_atom(app * atom, bool gate_ctx, bool not_flag = false) override;
         bool internalize_term(app * term) override;
         void new_eq_eh(theory_var v1, theory_var v2) override;
         bool use_diseqs() const override;

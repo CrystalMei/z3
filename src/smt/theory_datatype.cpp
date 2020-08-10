@@ -287,7 +287,7 @@ namespace smt {
         return r;
     }
 
-    bool theory_datatype::internalize_atom(app * atom, bool gate_ctx) {
+    bool theory_datatype::internalize_atom(app * atom, bool gate_ctx, bool not_flag) {
         TRACE("datatype", tout << "internalizing atom:\n" << mk_pp(atom, m) << "\n";);
         return internalize_term(atom);
     }

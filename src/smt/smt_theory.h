@@ -171,7 +171,7 @@ namespace smt {
            After the execution of this method the given atom must be
            associated with a new boolean variable.
         */
-        virtual bool internalize_atom(app * atom, bool gate_ctx) = 0;
+        virtual bool internalize_atom(app * atom, bool gate_ctx, bool not_flag = false) = 0;
 
         /**
            \brief This method is invoked by the logical context

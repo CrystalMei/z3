@@ -1522,7 +1522,7 @@ bool theory_seq::simplify_and_solve_eqs() {
 void theory_seq::internalize_eq_eh(app * atom, bool_var v) {
 }
 
-bool theory_seq::internalize_atom(app* a, bool) {
+bool theory_seq::internalize_atom(app* a, bool, bool not_flag) {
     return internalize_term(a);
 }
 

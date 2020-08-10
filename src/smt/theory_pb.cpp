@@ -454,7 +454,7 @@ namespace smt {
         return alloc(theory_pb, *new_ctx);
     }
 
-    bool theory_pb::internalize_atom(app * atom, bool gate_ctx) {
+    bool theory_pb::internalize_atom(app * atom, bool gate_ctx, bool not_flag) {
 
         if (ctx.b_internalized(atom)) {
             return true;

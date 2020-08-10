@@ -676,7 +676,7 @@ br_status arith_rewriter::mk_eq_core(expr * arg1, expr * arg2, expr_ref & result
         //     st = BR_REWRITE2;
         // }
         IF_VERBOSE(5, verbose_stream() << "mk_eq_core: rewrite to LE and GE\n"; );
-        result = m().mk_and(m_util.mk_ge(arg1, arg2), m_util.mk_le(arg1, arg2));
+        result = m().mk_and(m_util.mk_le(arg1, arg2), m_util.mk_ge(arg1, arg2));
         st = BR_REWRITE2;
     }
     else if (m_arith_lhs || is_arith_term(arg1) || is_arith_term(arg2)) {

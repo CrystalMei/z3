@@ -139,7 +139,7 @@ namespace smt {
         void push_case_expand(case_expansion* e) { m_q_case_expand.push_back(e); }
         void push_body_expand(body_expansion* e) { m_q_body_expand.push_back(e); }
 
-        bool internalize_atom(app * atom, bool gate_ctx) override;
+        bool internalize_atom(app * atom, bool gate_ctx, bool not_flag = false) override;
         bool internalize_term(app * term) override;
         void reset_eh() override;
         void relevant_eh(app * n) override;

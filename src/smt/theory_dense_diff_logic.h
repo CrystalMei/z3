@@ -213,7 +213,7 @@ namespace smt {
         // Internalization
         //
         // -----------------------------------
-        bool internalize_atom(app * n, bool gate_ctx) override;
+        bool internalize_atom(app * n, bool gate_ctx, bool not_flag = false) override;
         bool internalize_term(app * term) override;
         void internalize_eq_eh(app * atom, bool_var v) override;
         void apply_sort_cnstr(enode * n, sort * s) override;
