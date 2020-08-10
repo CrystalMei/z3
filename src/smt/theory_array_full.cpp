@@ -241,7 +241,7 @@ namespace smt {
         return r;
     }
 
-    bool theory_array_full::internalize_atom(app * atom, bool, bool not_flag) {
+    bool theory_array_full::internalize_atom(app * atom, bool) {
         return internalize_term(atom);
     }
 

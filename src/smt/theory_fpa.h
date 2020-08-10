@@ -157,7 +157,7 @@ namespace smt {
         obj_hashtable<func_decl>  m_is_added_to_model;
 
         final_check_status final_check_eh() override;
-        bool internalize_atom(app * atom, bool gate_ctx, bool not_flag = false) override;
+        bool internalize_atom(app * atom, bool gate_ctx) override;
         bool internalize_term(app * term) override;
         void apply_sort_cnstr(enode * n, sort * s) override;
         void new_eq_eh(theory_var, theory_var) override;

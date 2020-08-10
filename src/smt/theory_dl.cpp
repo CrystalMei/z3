@@ -113,7 +113,7 @@ namespace smt {
 
         char const * get_name() const override { return "datalog"; }
 
-        bool internalize_atom(app * atom, bool gate_ctx, bool not_flag = false) override {
+        bool internalize_atom(app * atom, bool gate_ctx) override {
             TRACE("theory_dl", tout << mk_pp(atom, m()) << "\n";);
             if (ctx.b_internalized(atom)) {
                 return true;

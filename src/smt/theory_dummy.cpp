@@ -35,7 +35,7 @@ namespace smt {
         m_name(name) {
     }
 
-    bool theory_dummy::internalize_atom(app * atom, bool gate_ctx, bool not_flag) {
+    bool theory_dummy::internalize_atom(app * atom, bool gate_ctx) {
         found_theory_expr();
         return false;
     }

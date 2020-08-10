@@ -261,7 +261,7 @@ namespace smt {
         */
         app * mk_eq_atom(expr * lhs, expr * rhs) override { return m_util.mk_eq(lhs, rhs); }
 
-        bool internalize_atom(app * atom, bool gate_ctx, bool not_flag = false) override;
+        bool internalize_atom(app * atom, bool gate_ctx) override;
                                                      
         bool internalize_term(app * term) override;
 

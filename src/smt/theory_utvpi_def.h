@@ -304,7 +304,7 @@ namespace smt {
     }
 
     template<typename Ext>
-    bool theory_utvpi<Ext>::internalize_atom(app * n, bool, bool not_flag) {
+    bool theory_utvpi<Ext>::internalize_atom(app * n, bool) {
         if (!m_consistent)
             return false;
         if (!a.is_le(n) && !a.is_ge(n) && !a.is_lt(n) && !a.is_gt(n)) {

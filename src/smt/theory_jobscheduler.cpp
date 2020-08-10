@@ -68,7 +68,7 @@ namespace smt {
         return true;
     }
 
-    bool theory_jobscheduler::internalize_atom(app * atom, bool gate_ctx, bool not_flag) {
+    bool theory_jobscheduler::internalize_atom(app * atom, bool gate_ctx) {
         TRACE("csp", tout << mk_pp(atom, m) << "\n";);
         SASSERT(u.is_model(atom));
         for (expr* arg : *atom) {

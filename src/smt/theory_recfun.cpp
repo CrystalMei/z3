@@ -53,7 +53,7 @@ namespace smt {
     void theory_recfun::init_search_eh() {
     }
 
-    bool theory_recfun::internalize_atom(app * atom, bool gate_ctx, bool not_flag) {
+    bool theory_recfun::internalize_atom(app * atom, bool gate_ctx) {
         TRACEFN(mk_pp(atom, m));
         if (!u().has_defs()) {
             return false;

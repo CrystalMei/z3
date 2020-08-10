@@ -179,8 +179,8 @@ void theory_diff_logic_weak<Ext>::found_non_diff_logic_expr(expr * n) {
 }
 
 template<typename Ext>
-bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx, bool not_flag) {
-    IF_VERBOSE(5, verbose_stream() << "W-DL: internalize_atom with gate_ctx(" << gate_ctx << ") and not_flag(" << not_flag << "): " << mk_pp(n, m) << "\n";);
+bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx) {
+    IF_VERBOSE(5, verbose_stream() << "W-DL: internalize_atom with gate_ctx(" << gate_ctx << "): " << mk_pp(n, m) << "\n";);
     if (!m_consistent)
         return false;
     if (!m_util.is_le(n) && !m_util.is_ge(n)) {
@@ -299,7 +299,6 @@ bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx, bool 
     // return true;
 
     IF_VERBOSE(5, verbose_stream() << "W-DL: edge: src_id #" << source << ", dst_id #" << target << ", weight: " << k << ", gate_ctx(" << gate_ctx << ")\n";);
-
     // keeps x <= k
     if (target == 0 || source == 0) {
         IF_VERBOSE(5, verbose_stream() << "W-DL: edge with single variable (edge to 0)\n";);
@@ -331,105 +330,137 @@ bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx, bool 
             );
         return true;
     }
-    
-    else if (not_flag) {
-        IF_VERBOSE(5, verbose_stream() << "W-DL: <NOT> edge\n";);
-        if (k > numeral(0)) {
-            IF_VERBOSE(5, verbose_stream() << "W-DL: <NOT> edge with weight > 0\n";);
-            k.neg();
-            if (m_util.is_int(lhs)) {
-                SASSERT(k.is_int());
-                k -= numeral(1);
-            }
-            else {
-                k -= this->m_epsilon; 
-            }
-            edge_id neg = m_graph.add_edge(target, source, k, ~l);
-            atom * a = alloc(atom, bv, null_edge_id, neg);
-            m_atoms.push_back(a);
-            m_bool_var2atom.insert(bv, a);
+    // keeps x - y <= k when k <= 0
+    else if (k <= numeral(0)) {
+        IF_VERBOSE(5, verbose_stream() << "W-DL: edge valid weight (<= 0)\n";);
 
-            IF_VERBOSE(5, verbose_stream() << "W-DL: internalize_atom done:\nexpr:\n" << mk_pp(n, m) << "\nedge:\n";
-                a->display(*this, verbose_stream());
-                verbose_stream() << "\n";
-                // m_graph.display_edge(verbose_stream() << "\tpos #"<< pos << ": ", pos);
-                m_graph.display_edge(verbose_stream() << "\tneg #"<< neg << ": ", neg); );
-            IF_VERBOSE(5, verbose_stream() << "\nW-DL: dl-graph display:\n";
-                display(verbose_stream()); );
-            TRACE("arith", 
-                tout << mk_pp(n, m) << "\n";
-                // m_graph.display_edge(tout << "pos: ", pos); 
-                m_graph.display_edge(tout << "neg: ", neg); 
-                );
-            return true;
-        }
-        else {
-            IF_VERBOSE(5, verbose_stream() << "W-DL: <NOT> edge with weight <= 0\n";);
-            edge_id pos = m_graph.add_edge(source, target, k, l);
-            k.neg();
-            if (m_util.is_int(lhs)) {
-                SASSERT(k.is_int());
-                k -= numeral(1);
-            }
-            else {
-                k -= this->m_epsilon; 
-            }
-            edge_id neg = m_graph.add_edge(target, source, k, ~l);
-            atom * a = alloc(atom, bv, pos, neg);
-            m_atoms.push_back(a);
-            m_bool_var2atom.insert(bv, a);
+        edge_id pos = m_graph.add_edge(source, target, numeral(0), l);
+        edge_id neg = m_graph.add_edge(target, source, numeral(-1), ~l);
+        atom * a = alloc(atom, bv, pos, neg);
+        m_atoms.push_back(a);
+        m_bool_var2atom.insert(bv, a);
 
-            IF_VERBOSE(5, verbose_stream() << "W-DL: internalize_atom done:\nexpr:\n" << mk_pp(n, m) << "\nedge:\n";
-                a->display(*this, verbose_stream());
-                verbose_stream() << "\n";
-                m_graph.display_edge(verbose_stream() << "\tpos #"<< pos << ": ", pos);
-                m_graph.display_edge(verbose_stream() << "\tneg #"<< neg << ": ", neg); );
-            IF_VERBOSE(5, verbose_stream() << "\nW-DL: dl-graph display:\n";
-                display(verbose_stream()); );
-            TRACE("arith", 
-                tout << mk_pp(n, m) << "\n";
-                m_graph.display_edge(tout << "pos: ", pos); 
-                m_graph.display_edge(tout << "neg: ", neg); 
-                );
-            return true;
-        }
+        IF_VERBOSE(5, verbose_stream() << "W-DL: internalize_atom done:\nexpr:\n" << mk_pp(n, m) << "\nedge:\n";
+            a->display(*this, verbose_stream());
+            verbose_stream() << "\n";
+            m_graph.display_edge(verbose_stream() << "\tpos #"<< pos << ": ", pos);
+            m_graph.display_edge(verbose_stream() << "\tneg #"<< neg << ": ", neg); );
+        IF_VERBOSE(5, verbose_stream() << "\nW-DL: dl-graph display:\n";
+            display(verbose_stream()); );
+        TRACE("arith", 
+            tout << mk_pp(n, m) << "\n";
+            m_graph.display_edge(tout << "pos: ", pos); 
+            m_graph.display_edge(tout << "neg: ", neg); 
+            );
+        return true;
     }
     else {
-        IF_VERBOSE(5, verbose_stream() << "W-DL: edge\n";);
-        if (k >= numeral(-1)) {
-            IF_VERBOSE(5, verbose_stream() << "W-DL: edge with weight >= -1\n";);
-            edge_id pos = m_graph.add_edge(source, target, k, l);
-            k.neg();
-            if (m_util.is_int(lhs)) {
-                SASSERT(k.is_int());
-                k -= numeral(1);
-            }
-            else {
-                k -= this->m_epsilon; 
-            }
-            edge_id neg = m_graph.add_edge(target, source, k, ~l);
-            // edge_id neg = m_graph.add_edge(target, source, numeral(0), ~l);
-            atom * a = alloc(atom, bv, pos, neg);
-            m_atoms.push_back(a);
-            m_bool_var2atom.insert(bv, a);
+        IF_VERBOSE(5, verbose_stream() << "W-DL: edge invalid weight (> 0)\n";);
 
-            IF_VERBOSE(5, verbose_stream() << "W-DL: internalize_atom done:\nexpr:\n" << mk_pp(n, m) << "\nedge:\n";
-                a->display(*this, verbose_stream());
-                verbose_stream() << "\n";
-                m_graph.display_edge(verbose_stream() << "\tpos #"<< pos << ": ", pos);
-                m_graph.display_edge(verbose_stream() << "\tneg #"<< neg << ": ", neg); );
-            IF_VERBOSE(5, verbose_stream() << "\nW-DL: dl-graph display:\n";
-                display(verbose_stream()); );
-            TRACE("arith", 
-                tout << mk_pp(n, m) << "\n";
-                m_graph.display_edge(tout << "pos: ", pos); 
-                m_graph.display_edge(tout << "neg: ", neg); 
-                );
-            return true;
+        if (!m_atoms.empty()) {
+            IF_VERBOSE(5, verbose_stream() << "W-DL: check EQUAL\n";);
+            // check last atom
+            atom * prev_a = m_atoms.back();
+            bool_var prev_bv = prev_a->get_bool_var();
+            literal prev_l(prev_bv);
+            expr * prev_n = ctx.bool_var2expr(prev_bv);
+            IF_VERBOSE(5, verbose_stream() << "W-DL: previous expr = " << mk_pp(prev_n, m) << "\n";);
+
+            app * prev_lhs = to_app(to_app(prev_n)->get_arg(0));
+            IF_VERBOSE(5, verbose_stream() << "W-DL: previous LHS = " << mk_pp(prev_lhs, m) << "\n";);
+            app * prev_rhs = to_app(to_app(prev_n)->get_arg(1));
+            IF_VERBOSE(5, verbose_stream() << "W-DL: previous RHS = " << mk_pp(prev_rhs, m) << "\n";);
+
+            // keeps x - y <= k (k > 0) when x - y >= k exists
+            if ((prev_lhs == lhs) && (prev_rhs == rhs)) {
+                IF_VERBOSE(5, verbose_stream() << "W-DL: EQUAL\n";);
+
+                numeral k2(k);
+                k.neg();
+                numeral k1(k);
+                edge_id pos1 = m_graph.add_edge(target, source, k1, prev_l);
+                edge_id pos2 = m_graph.add_edge(source, target, k2, l);
+                k1.neg(); k2.neg();
+                if (m_util.is_int(lhs)) {
+                    SASSERT(k.is_int());
+                    k1 -= numeral(1); 
+                    k2 -= numeral(1);
+                }
+                else {
+                    k1 -= this->m_epsilon; 
+                    k2 -= this->m_epsilon; 
+                }
+                edge_id neg1 = m_graph.add_edge(source, target, k1, ~prev_l);
+                edge_id neg2 = m_graph.add_edge(target, source, k2, ~l);
+                atom * a1 = alloc(atom, prev_bv, pos1, neg1);
+                atom * a2 = alloc(atom, bv, pos2, neg2);
+                m_atoms.push_back(a1);
+                m_atoms.push_back(a2);
+                m_bool_var2atom.insert(prev_bv, a1);
+                m_bool_var2atom.insert(bv, a2);
+
+                IF_VERBOSE(5, verbose_stream() << "W-DL: internalize_atom done:\nexpr1:\n" << mk_pp(prev_n, m) << "\nedge:\n";
+                    a1->display(*this, verbose_stream());
+                    verbose_stream() << "\n";
+                    m_graph.display_edge(verbose_stream() << "\tpos #"<< pos1 << ": ", pos1);
+                    m_graph.display_edge(verbose_stream() << "\tneg #"<< neg1 << ": ", neg1); );
+                IF_VERBOSE(5, verbose_stream() << "W-DL: internalize_atom done:\nexpr2:\n" << mk_pp(n, m) << "\nedge:\n";
+                    a2->display(*this, verbose_stream());
+                    verbose_stream() << "\n";
+                    m_graph.display_edge(verbose_stream() << "\tpos #"<< pos1 << ": ", pos2);
+                    m_graph.display_edge(verbose_stream() << "\tneg #"<< neg2 << ": ", neg2); );
+                IF_VERBOSE(5, verbose_stream() << "\nW-DL: dl-graph display:\n";
+                    display(verbose_stream()); );
+                
+                return true;
+            }
+            // removes x - y <= k when k > 0
+            else {
+                IF_VERBOSE(5, verbose_stream() << "W-DL: not EQUAL, not positive -> no edge\n";);
+
+                // edge_id pos = m_graph.add_edge(source, source, numeral(0), l);
+                // edge_id neg = m_graph.add_edge(source, source, numeral(-1), ~l);
+
+                // edge_id pos = m_graph.add_edge(source, target, k, l);
+                // k.neg();
+                // if (m_util.is_int(lhs)) {
+                //     SASSERT(k.is_int());
+                //     k -= numeral(1);
+                // }
+                // else {
+                //     k -= this->m_epsilon; 
+                // }
+                // edge_id neg = m_graph.add_edge(target, source, k, ~l);
+
+                atom * a = alloc(atom, bv, null_edge_id, null_edge_id);
+                m_atoms.push_back(a);
+                m_bool_var2atom.insert(bv, a);
+
+                IF_VERBOSE(5, verbose_stream() << "W-DL: internalize_atom done:\nexpr:\n" << mk_pp(n, m) << "\n";);
+                // "\nedge:\n";
+                //     a->display(*this, verbose_stream());
+                //     verbose_stream() << "\n";
+                //     m_graph.display_edge(verbose_stream() << "\tpos #"<< pos << ": ", pos);
+                //     m_graph.display_edge(verbose_stream() << "\tneg #"<< neg << ": ", neg); );
+                IF_VERBOSE(5, verbose_stream() << "\nW-DL: dl-graph display:\n";
+                    display(verbose_stream()); );
+                // TRACE("arith", 
+                //     tout << mk_pp(n, m) << "\n";
+                //     m_graph.display_edge(tout << "pos: ", pos); 
+                //     m_graph.display_edge(tout << "neg: ", neg); 
+                //     );
+                return true;
+            }
         }
+
+        // removes x - y <= k when k > 0
         else {
-            IF_VERBOSE(5, verbose_stream() << "W-DL: edge with weight < -1\n";);
-            edge_id pos = m_graph.add_edge(source, target, k, l);
+            IF_VERBOSE(5, verbose_stream() << "W-DL: not positive -> no edge\n";);
+
+            // edge_id pos = m_graph.add_edge(source, source, numeral(0), l);
+            // edge_id neg = m_graph.add_edge(source, source, numeral(-1), ~l);
+
+            // edge_id pos = m_graph.add_edge(source, target, k, l);
             // k.neg();
             // if (m_util.is_int(lhs)) {
             //     SASSERT(k.is_int());
@@ -439,26 +470,28 @@ bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx, bool 
             //     k -= this->m_epsilon; 
             // }
             // edge_id neg = m_graph.add_edge(target, source, k, ~l);
-            atom * a = alloc(atom, bv, pos, null_edge_id);
+
+            atom * a = alloc(atom, bv, null_edge_id, null_edge_id);
             m_atoms.push_back(a);
             m_bool_var2atom.insert(bv, a);
 
-            IF_VERBOSE(5, verbose_stream() << "W-DL: internalize_atom done:\nexpr:\n" << mk_pp(n, m) << "\nedge:\n";
-                a->display(*this, verbose_stream());
-                verbose_stream() << "\n";
-                m_graph.display_edge(verbose_stream() << "\tpos #"<< pos << ": ", pos);
-                // m_graph.display_edge(verbose_stream() << "\tneg #"<< neg << ": ", neg);
-                );
+            IF_VERBOSE(5, verbose_stream() << "W-DL: internalize_atom done:\nexpr:\n" << mk_pp(n, m) << "\n"; );
+                // "\nedge:\n";
+                // a->display(*this, verbose_stream());
+                // verbose_stream() << "\n";
+                // m_graph.display_edge(verbose_stream() << "\tpos #"<< pos << ": ", pos);
+                // m_graph.display_edge(verbose_stream() << "\tneg #"<< neg << ": ", neg); );
             IF_VERBOSE(5, verbose_stream() << "\nW-DL: dl-graph display:\n";
                 display(verbose_stream()); );
-            TRACE("arith", 
-                tout << mk_pp(n, m) << "\n";
-                m_graph.display_edge(tout << "pos: ", pos); 
-                // m_graph.display_edge(tout << "neg: ", neg); 
-                );
+            // TRACE("arith", 
+            //     tout << mk_pp(n, m) << "\n";
+            //     m_graph.display_edge(tout << "pos: ", pos); 
+            //     m_graph.display_edge(tout << "neg: ", neg); 
+            //     );
             return true;
         }
-    }    
+    }
+    
 }
 
 template<typename Ext>

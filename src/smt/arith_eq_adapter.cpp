@@ -186,12 +186,12 @@ namespace smt {
               tout << "try_true_first: " << ctx.try_true_first(t1_eq_t2_lit.var()) << "\n";);
         TRACE("arith_eq_adapter_bug",
               tout << "le: " << mk_ismt2_pp(le, m) << "\nge: " << mk_ismt2_pp(ge, m) << "\n";);
-        ctx.internalize(le, true);
         ctx.internalize(ge, true);
-        SASSERT(ctx.lit_internalized(le));
+        ctx.internalize(le, true);
         SASSERT(ctx.lit_internalized(ge));
-        literal le_lit = ctx.get_literal(le);
+        SASSERT(ctx.lit_internalized(le));
         literal ge_lit = ctx.get_literal(ge);
+        literal le_lit = ctx.get_literal(le);
         if (ctx.try_true_first(t1_eq_t2_lit.var())) {
             // Remark: I need to propagate the try_true_first flag to the auxiliary atom le_lit and ge_lit.
             // Otherwise model based theory combination will be ineffective, because if the core

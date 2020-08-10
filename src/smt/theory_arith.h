@@ -651,7 +651,7 @@ namespace smt {
             bool operator()(atom* a1, atom* a2) const { return a1->get_k() < a2->get_k(); }
         };
         bool default_internalizer() const override { return false; }
-        bool internalize_atom(app * n, bool gate_ctx, bool not_flag = false) override;
+        bool internalize_atom(app * n, bool gate_ctx) override;
         bool internalize_term(app * term) override;
         void internalize_eq_eh(app * atom, bool_var v) override;
         void apply_sort_cnstr(enode * n, sort * s) override;

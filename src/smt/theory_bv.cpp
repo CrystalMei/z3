@@ -1025,7 +1025,7 @@ namespace smt {
         return true;
     }
 
-    bool theory_bv::internalize_atom(app * atom, bool gate_ctx, bool not_flag) {
+    bool theory_bv::internalize_atom(app * atom, bool gate_ctx) {
         TRACE("bv", tout << "internalizing atom: " << mk_bounded_pp(atom, m) << "\n";);
         SASSERT(atom->get_family_id() == get_family_id());
         if (approximate_term(atom)) {

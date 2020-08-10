@@ -408,7 +408,7 @@ namespace smt {
         TRACE("t_fpa", tout << "new theory var: " << mk_ismt2_pp(n->get_owner(), m) << " := " << v << "\n";);
     }
 
-    bool theory_fpa::internalize_atom(app * atom, bool gate_ctx, bool not_flag) {
+    bool theory_fpa::internalize_atom(app * atom, bool gate_ctx) {
         TRACE("t_fpa_internalize", tout << "internalizing atom: " << mk_ismt2_pp(atom, m) << std::endl;);
         SASSERT(atom->get_family_id() == get_family_id());
 

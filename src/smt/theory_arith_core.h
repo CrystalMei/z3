@@ -1253,7 +1253,7 @@ namespace smt {
 
 
     template<typename Ext>
-    bool theory_arith<Ext>::internalize_atom(app * n, bool gate_ctx, bool not_flag) {
+    bool theory_arith<Ext>::internalize_atom(app * n, bool gate_ctx) {
         IF_VERBOSE(5, verbose_stream() << "Arith: internalize_atom:\n" << mk_pp(n, m) << "\n";);
         TRACE("arith_internalize", tout << "internalizing atom:\n" << mk_pp(n, m) << "\n";);
         SASSERT(m_util.is_le(n) || m_util.is_ge(n) || m_util.is_is_int(n));

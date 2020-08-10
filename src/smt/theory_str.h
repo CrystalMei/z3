@@ -801,7 +801,7 @@ public:
     void after_merge_eh(theory_var r1, theory_var r2, theory_var v1, theory_var v2) { }
     void unmerge_eh(theory_var v1, theory_var v2) {}
 protected:
-    bool internalize_atom(app * atom, bool gate_ctx, bool not_flag = false) override;
+    bool internalize_atom(app * atom, bool gate_ctx) override;
     bool internalize_term(app * term) override;
     virtual enode* ensure_enode(expr* e);
     theory_var mk_var(enode * n) override;

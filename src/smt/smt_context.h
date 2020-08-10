@@ -742,28 +742,28 @@ namespace smt {
 
         void top_sort_expr(expr* const* exprs, unsigned num_exprs, svector<expr_bool_pair> & sorted_exprs);
 
-        void internalize_rec(expr * n, bool gate_ctx, bool not_flag = false);
+        void internalize_rec(expr * n, bool gate_ctx);
 
-        void internalize_deep(expr * n, bool not_flag = false);
-        void internalize_deep(expr* const* n, unsigned num_exprs, bool not_flag = false);
+        void internalize_deep(expr * n);
+        void internalize_deep(expr* const* n, unsigned num_exprs);
 
-        void assert_default(expr * n, proof * pr, bool not_flag = false);
+        void assert_default(expr * n, proof * pr);
 
-        void assert_distinct(app * n, proof * pr, bool not_flag = false);
+        void assert_distinct(app * n, proof * pr);
 
-        void internalize_formula(expr * n, bool gate_ctx, bool not_flag = false);
+        void internalize_formula(expr * n, bool gate_ctx);
 
-        void internalize_eq(app * n, bool gate_ctx, bool not_flag = false);
+        void internalize_eq(app * n, bool gate_ctx);
 
-        void internalize_distinct(app * n, bool gate_ctx, bool not_flag = false);
+        void internalize_distinct(app * n, bool gate_ctx);
 
-        bool internalize_theory_atom(app * n, bool gate_ctx, bool not_flag = false);
+        bool internalize_theory_atom(app * n, bool gate_ctx);
 
-        void internalize_quantifier(quantifier * q, bool gate_ctx, bool not_flag = false);
+        void internalize_quantifier(quantifier * q, bool gate_ctx);
 
-        void internalize_lambda(quantifier * q, bool not_flag = false);
+        void internalize_lambda(quantifier * q);
 
-        void internalize_formula_core(app * n, bool gate_ctx, bool not_flag = false);
+        void internalize_formula_core(app * n, bool gate_ctx);
 
         void set_merge_tf(enode * n, bool_var v, bool is_new_var);
 
@@ -773,13 +773,13 @@ namespace smt {
         void set_enode_flag(bool_var v, bool is_new_var);
 
     protected:
-        void internalize_term(app * n, bool not_flag = false);
+        void internalize_term(app * n);
 
-        void internalize_ite_term(app * n, bool not_flag = false);
+        void internalize_ite_term(app * n);
 
-        bool internalize_theory_term(app * n, bool not_flag = false);
+        bool internalize_theory_term(app * n);
 
-        void internalize_uninterpreted(app * n, bool not_flag = false);
+        void internalize_uninterpreted(app * n);
 
         friend class mk_bool_var_trail;
         class mk_bool_var_trail : public trail<context> {
@@ -869,12 +869,12 @@ namespace smt {
         void add_lit_occs(clause const& cls);
     public:        
 
-        void ensure_internalized(expr* e, bool not_flag = false);
+        void ensure_internalized(expr* e);
 
-        void internalize(expr * n, bool gate_ctx, bool not_flag = false);
-        void internalize(expr* const* exprs, unsigned num_exprs, bool gate_ctx, bool not_flag = false);
+        void internalize(expr * n, bool gate_ctx);
+        void internalize(expr* const* exprs, unsigned num_exprs, bool gate_ctx);
 
-        void internalize(expr * n, bool gate_ctx, unsigned generation, bool not_flag = false);
+        void internalize(expr * n, bool gate_ctx, unsigned generation);
 
         clause * mk_clause(unsigned num_lits, literal * lits, justification * j, clause_kind k = CLS_AUX, clause_del_eh * del_eh = nullptr);
 
@@ -1598,7 +1598,7 @@ namespace smt {
 
         void get_guessed_literals(expr_ref_vector & result);
 
-        void internalize_assertion(expr * n, proof * pr, unsigned generation, bool not_flag = false);
+        void internalize_assertion(expr * n, proof * pr, unsigned generation);
 
         void internalize_proxies(expr_ref_vector const& asms, vector<std::pair<expr*,expr_ref>>& asm2proxy);
 

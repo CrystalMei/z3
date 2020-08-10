@@ -990,7 +990,7 @@ public:
             mk_is_int_axiom(n);        
     }
 
-    bool internalize_atom(app * atom, bool gate_ctx, bool not_flag) {
+    bool internalize_atom(app * atom, bool gate_ctx) {
         TRACE("arith", tout << mk_pp(atom, m) << "\n";);
         SASSERT(!ctx().b_internalized(atom));
         expr* n1, *n2;
@@ -4046,8 +4046,8 @@ theory* theory_lra::mk_fresh(context* new_ctx) {
 void theory_lra::init() {
     m_imp->init();
 }    
-bool theory_lra::internalize_atom(app * atom, bool gate_ctx, bool not_flag) {
-    return m_imp->internalize_atom(atom, gate_ctx, not_flag);
+bool theory_lra::internalize_atom(app * atom, bool gate_ctx) {
+    return m_imp->internalize_atom(atom, gate_ctx);
 }
 bool theory_lra::internalize_term(app * term) {
     return m_imp->internalize_term(term);
