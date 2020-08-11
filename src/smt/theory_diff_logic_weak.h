@@ -204,6 +204,12 @@ namespace smt {
         Simplex                        m_S;
         unsigned                       m_num_simplex_edges;
 
+        int_vector                     m_equation_kept;
+        int_vector                     m_equation_elim;
+        svector<numeral>               m_equation_weight;
+
+        svector<unsigned>         m_equation_track;      
+
         struct var_value_hash;
         friend struct var_value_hash;
         struct var_value_hash {
@@ -275,6 +281,8 @@ namespace smt {
 
         void new_diseq_eh(theory_var v1, theory_var v2) override;
 
+        void push_equations(unsigned);
+
         void push_scope_eh() override;
 
         void pop_scope_eh(unsigned num_scopes) override;
@@ -315,6 +323,8 @@ namespace smt {
         model_value_proc * mk_value(enode * n, model_generator & mg) override;
                 
         void display(std::ostream & out) const override;
+
+        void display_equws(std::ostream & out, svector<numeral> ws) const;
         
         void collect_statistics(::statistics & st) const override;
 

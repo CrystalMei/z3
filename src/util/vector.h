@@ -554,6 +554,19 @@ public:
         return false;
     }
 
+    int index(T const & elem) const {
+        const_iterator it  = begin();
+        const_iterator e = end();
+        SZ idx = 0;
+        for (; it != e; ++it) {
+            if (*it == elem) {
+                return idx;
+            }
+            idx += 1;
+        }
+        return -1;
+    }
+
     // set pos idx with elem. If idx >= size, then expand using default.
     void setx(SZ idx, T const & elem, T const & d) {
         if (idx >= size()) {
