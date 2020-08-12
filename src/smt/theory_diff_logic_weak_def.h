@@ -302,32 +302,33 @@ bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx) {
     IF_VERBOSE(5, verbose_stream() << "W-DL: edge: src_id #" << source << ", dst_id #" << target << ", weight: " << k << ", gate_ctx(" << gate_ctx << ")\n";);
     // keeps x <= k and its weight
     // keeps x - y <= 0
-    if (target == 0 || source == 0) {
-        IF_VERBOSE(5, verbose_stream() << "W-DL: edge with single variable (edge to 0\n";);
-        edge_id pos = m_graph.add_edge(source, target, k, l);
-        k.neg();
-        if (m_util.is_int(lhs)) {
-            SASSERT(k.is_int());
-            k -= numeral(1);
-        }
-        else {
-            k -= this->m_epsilon; 
-        }
-        edge_id neg = m_graph.add_edge(target, source, k, ~l);
-        atom * a = alloc(atom, bv, pos, neg);
-        m_atoms.push_back(a);
-        m_bool_var2atom.insert(bv, a);
+    // if (target == 0 || source == 0) {
+    //     IF_VERBOSE(5, verbose_stream() << "W-DL: edge with single variable (edge to 0)\n";);
+    //     numeral weight_pos(k);
+    //     k.neg();
+    //     if (m_util.is_int(lhs)) {
+    //         SASSERT(k.is_int());
+    //         k -= numeral(1);
+    //     }
+    //     else {
+    //         k -= this->m_epsilon; 
+    //     }
+    //     edge_id pos = m_graph.add_edge(source, target, weight_pos, l);
+    //     edge_id neg = m_graph.add_edge(target, source, weight_neg, ~l);
+    //     atom * a = alloc(atom, bv, pos, neg);
+    //     m_atoms.push_back(a);
+    //     m_bool_var2atom.insert(bv, a);
 
-        IF_VERBOSE(15, verbose_stream() << "W-DL: internalize_atom done:\nexpr:\n" << mk_pp(n, m) << "\nedge:\n";
-            a->display(*this, verbose_stream());
-            verbose_stream() << "\n";
-            m_graph.display_edge(verbose_stream() << "\tpos #"<< pos << ": ", pos);
-            m_graph.display_edge(verbose_stream() << "\tneg #"<< neg << ": ", neg); );
-        IF_VERBOSE(15, verbose_stream() << "\nW-DL: dl-graph display:\n";
-            display(verbose_stream()); );
-        IF_VERBOSE(5, verbose_stream() << "\nW-DL: equation list display:\nkeep: " << m_equation_kept << "\nelim: " << m_equation_elim << "\nweig: "; display_equws(verbose_stream(), m_equation_weight););
-        return true;
-    }
+    //     IF_VERBOSE(15, verbose_stream() << "W-DL: internalize_atom done:\nexpr:\n" << mk_pp(n, m) << "\nedge:\n";
+    //         a->display(*this, verbose_stream());
+    //         verbose_stream() << "\n";
+    //         m_graph.display_edge(verbose_stream() << "\tpos #"<< pos << ": ", pos);
+    //         m_graph.display_edge(verbose_stream() << "\tneg #"<< neg << ": ", neg); );
+    //     IF_VERBOSE(15, verbose_stream() << "\nW-DL: dl-graph display:\n";
+    //         display(verbose_stream()); );
+    //     IF_VERBOSE(5, verbose_stream() << "\nW-DL: equation list display:\nkeep: " << m_equation_kept << "\nelim: " << m_equation_elim << "\nweig: "; display_equws(verbose_stream(), m_equation_weight););
+    //     return true;
+    // }
 
     // check equal first
     if (!m_atoms.empty()) {
@@ -349,6 +350,7 @@ bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx) {
             k.neg();
             numeral k1(k);
 
+            theory_var src; theory_var dst; numeral wgt;
             if (k2 > numeral(0)) { // k > 0
                 int source_idx = m_equation_elim.index(source);
                 int target_idx = m_equation_elim.index(target);
@@ -358,6 +360,7 @@ bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx) {
                     m_equation_kept.push_back(kept_old);
                     m_equation_elim.push_back(target);
                     m_equation_weight.push_back(weight_old + k2);
+                    src = kept_old; dst = target; wgt = weight_old + k2;
                 }
                 else if ((source_idx == -1) && (target_idx != -1)) {
                     theory_var kept_old = m_equation_kept[target_idx];
@@ -365,12 +368,16 @@ bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx) {
                     m_equation_kept.push_back(kept_old);
                     m_equation_elim.push_back(source);
                     m_equation_weight.push_back(weight_old - k2);
-
+                    src = kept_old; dst = source; wgt = weight_old - k2;
                 }
                 else if ((source_idx == -1) && (target_idx == -1)) { // target = source + (>0)
                     m_equation_kept.push_back(source);
                     m_equation_elim.push_back(target);
                     m_equation_weight.push_back(k2);
+                    src = source; dst = target; wgt = k2;
+                }
+                else {
+                    src = source; dst = target; wgt = k2;
                 }
             }
             else { // k <= 0
@@ -382,6 +389,7 @@ bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx) {
                     m_equation_kept.push_back(kept_old);
                     m_equation_elim.push_back(source);
                     m_equation_weight.push_back(weight_old + k1);
+                    src = kept_old; dst = source; wgt = weight_old + k1;
                 }
                 else if ((source_idx != -1) && (target_idx == -1)) {
                     theory_var kept_old = m_equation_kept[source_idx];
@@ -389,38 +397,45 @@ bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx) {
                     m_equation_kept.push_back(kept_old);
                     m_equation_elim.push_back(target); 
                     m_equation_weight.push_back(weight_old - k1);
+                    src = kept_old; dst = target; wgt = weight_old - k1;
                 }
                 else if ((source_idx == -1) && (target_idx == -1)) { // source = target + (>0)
                     m_equation_kept.push_back(target);
                     m_equation_elim.push_back(source); 
                     m_equation_weight.push_back(k1);
+                    src = source; dst = target; wgt = k2;
+                }
+                else {
+                    src = source; dst = target; wgt = k2;
                 }
             }
-
-            edge_id pos1 = m_graph.add_edge(target, source, k1, prev_l);
-            k1.neg();
+            numeral wgt2(wgt);
+            wgt.neg();
+            numeral wgt1(wgt);
+            edge_id pos1 = m_graph.add_edge(dst, src, wgt1, prev_l);
+            wgt1.neg();
             if (m_util.is_int(lhs)) {
-                SASSERT(k.is_int());
-                k1 -= numeral(1);
+                SASSERT(wgt1.is_int());
+                wgt1 -= numeral(1);
             }
             else {
-                k1 -= this->m_epsilon;
+                wgt1 -= this->m_epsilon;
             }
-            edge_id neg1 = m_graph.add_edge(source, target, k1, ~prev_l);
+            edge_id neg1 = m_graph.add_edge(src, dst, wgt1, ~prev_l);
             atom * a1 = alloc(atom, prev_bv, pos1, neg1);
             m_atoms.push_back(a1);
             m_bool_var2atom.insert(prev_bv, a1);
 
-            edge_id pos2 = m_graph.add_edge(source, target, k2, l);
-            k2.neg();
+            edge_id pos2 = m_graph.add_edge(src, dst, wgt2, l);
+            wgt2.neg();
             if (m_util.is_int(lhs)) {
-                SASSERT(k.is_int());
-                k2 -= numeral(1);
+                SASSERT(wgt2.is_int());
+                wgt2 -= numeral(1);
             }
             else {
-                k2 -= this->m_epsilon; 
+                wgt2 -= this->m_epsilon; 
             }
-            edge_id neg2 = m_graph.add_edge(target, source, k2, ~l);
+            edge_id neg2 = m_graph.add_edge(dst, src, wgt2, ~l);
             atom * a2 = alloc(atom, bv, pos2, neg2);
             m_atoms.push_back(a2);
             m_bool_var2atom.insert(bv, a2);
@@ -462,15 +477,16 @@ bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx) {
         numeral weight_pos_new = weight_pos + weight_old;
         numeral weight_neg_new = weight_neg - weight_old;
         edge_id pos; edge_id neg;
-        if (weight_pos_new < numeral(0))
-            pos = m_graph.add_edge(kept_old, target, numeral(-1), l);
-        else if (weight_pos_new == numeral(0))
+        if (target == 0 || kept_old == 0 || weight_pos_new == numeral(0))
             pos = m_graph.add_edge(kept_old, target, weight_pos_new, l);
+        else if (weight_pos_new < numeral(0))
+            pos = m_graph.add_edge(kept_old, target, numeral(-1), l);
         else pos = null_edge_id;
-        if (weight_neg_new <= numeral(0))
-            neg = m_graph.add_edge(target, kept_old, numeral(-1), ~l);
-        else if (weight_neg_new == numeral(0))
+
+        if (target == 0 || kept_old == 0 || weight_neg_new == numeral(0))
             neg = m_graph.add_edge(target, kept_old, weight_neg_new, ~l);
+        else if (weight_neg_new <= numeral(0))
+            neg = m_graph.add_edge(target, kept_old, numeral(-1), ~l);
         else neg = null_edge_id;
         atom * a = alloc(atom, bv, pos, neg);
         m_atoms.push_back(a);
@@ -483,15 +499,16 @@ bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx) {
         numeral weight_pos_new = weight_pos - weight_old;
         numeral weight_neg_new = weight_neg + weight_old;
         edge_id pos; edge_id neg;
-        if (weight_pos_new < numeral(0))
-            pos = m_graph.add_edge(source, kept_old, numeral(-1), l);
-        else if (weight_pos_new == numeral(0))
+        if (source == 0 || kept_old == 0 || weight_pos_new == numeral(0))
             pos = m_graph.add_edge(source, kept_old, weight_pos_new, l);
+        else if (weight_pos_new < numeral(0))
+            pos = m_graph.add_edge(source, kept_old, numeral(-1), l);
         else pos = null_edge_id;
-        if (weight_neg_new < numeral(0))
-            neg = m_graph.add_edge(kept_old, source, numeral(-1), ~l);
-        else if (weight_neg_new == numeral(0))
+
+        if (source == 0 || kept_old == 0 || weight_neg_new == numeral(0))
             neg = m_graph.add_edge(kept_old, source, weight_neg_new, ~l);
+        else if (weight_neg_new < numeral(0))
+            neg = m_graph.add_edge(kept_old, source, numeral(-1), ~l);
         else neg = null_edge_id;
         atom * a = alloc(atom, bv, pos, neg);
         m_atoms.push_back(a);
@@ -506,31 +523,33 @@ bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx) {
         numeral weight_pos_new = weight_pos + source_weight_old - target_weight_old;
         numeral weight_neg_new = weight_neg - source_weight_old + target_weight_old;
         edge_id pos; edge_id neg;
-        if (weight_pos_new < numeral(0))
-            pos = m_graph.add_edge(source_kept_old, target_kept_old, numeral(-1), l);
-        else if (weight_pos_new == numeral(0))
+        if (weight_pos_new == numeral(0) || source_kept_old == 0 || target_kept_old == 0)
             pos = m_graph.add_edge(source_kept_old, target_kept_old, weight_pos_new, l);
+        else if (weight_pos_new < numeral(0))
+            pos = m_graph.add_edge(source_kept_old, target_kept_old, numeral(-1), l);
         else pos = null_edge_id;
-        if (weight_neg_new < numeral(0))
-            neg = m_graph.add_edge(target_kept_old, source_kept_old, numeral(-1), ~l);
-        else if (weight_neg_new == numeral(0))
+
+        if (weight_neg_new == numeral(0) || source_kept_old == 0 || target_kept_old == 0)
             neg = m_graph.add_edge(target_kept_old, source_kept_old, weight_neg_new, ~l);
+        else if (weight_neg_new < numeral(0))
+            neg = m_graph.add_edge(target_kept_old, source_kept_old, numeral(-1), ~l);
         else neg = null_edge_id;
+
         atom * a = alloc(atom, bv, pos, neg);
         m_atoms.push_back(a);
         m_bool_var2atom.insert(bv, a);
     }
     else {
         edge_id pos; edge_id neg;
-        if (weight_pos < numeral(0)) {
+        if (weight_pos == numeral(0) || target == 0 || source == 0) {
+            IF_VERBOSE(5, verbose_stream() << "W-DL: edge with weight [" << k << "] = 0 or edge to 0\n";);            
+            pos = m_graph.add_edge(source, target, weight_pos, l);
+            neg = m_graph.add_edge(target, source, weight_neg, ~l);
+        }
+        else if (weight_pos < numeral(0)) {
             IF_VERBOSE(5, verbose_stream() << "W-DL: edge with weight [" << k << "] < 0: only positive edge (original weight " << weight_pos << "\n";);            
             pos = m_graph.add_edge(source, target, numeral(-1), l);
             neg = null_edge_id;
-        }
-        else if (weight_pos == numeral(0)) {
-            IF_VERBOSE(5, verbose_stream() << "W-DL: edge with weight [" << k << "] = 0: both edge\n";);            
-            pos = m_graph.add_edge(source, target, weight_pos, l);
-            neg = m_graph.add_edge(target, source, weight_neg, ~l);
         }
         else {
             IF_VERBOSE(5, verbose_stream() << "W-DL: edge with weight [" << k << "] > 0: only negative edge (original weight " << weight_neg << "\n";);            
@@ -548,7 +567,7 @@ bool theory_diff_logic_weak<Ext>::internalize_atom(app * n, bool gate_ctx) {
     }
     IF_VERBOSE(15, verbose_stream() << "\nW-DL: dl-graph display:\n";
         display(verbose_stream()); );
-    IF_VERBOSE(5, verbose_stream() << "\nW-DL: equation list display:\nkeep: " << m_equation_kept << "\nelim: " << m_equation_elim << "\nweig: \n"; display_equws(verbose_stream(), m_equation_weight););
+    IF_VERBOSE(5, verbose_stream() << "\nW-DL: equation list display:\nkeep: " << m_equation_kept << "\nelim: " << m_equation_elim << "\nweig: "; display_equws(verbose_stream(), m_equation_weight););
     return true;
 }
 
