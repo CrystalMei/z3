@@ -455,8 +455,8 @@ namespace smt {
         scoped_suspend_rlimit _suspend_cancel(m.limit());
 
         try {
-            IF_VERBOSE(5, verbose_stream() << "add_eq: assigning: #" << n1->get_owner_id() << " = #" << n2->get_owner_id() << "\n";);
-            IF_VERBOSE(5, verbose_stream() << "add_eq (detail): " << "assigning\n" << enode_pp(n1, *this) << "\n" << enode_pp(n2, *this) << "\n" << "kind: " << js.get_kind() << "\n";);
+            IF_VERBOSE(15, verbose_stream() << "add_eq: assigning: #" << n1->get_owner_id() << " = #" << n2->get_owner_id() << "\n";);
+            IF_VERBOSE(15, verbose_stream() << "add_eq (detail): " << "assigning\n" << enode_pp(n1, *this) << "\n" << enode_pp(n2, *this) << "\n" << "kind: " << js.get_kind() << "\n";);
 
             TRACE("add_eq", tout << "assigning: #" << n1->get_owner_id() << " = #" << n2->get_owner_id() << "\n";);
             TRACE("add_eq_detail", tout << "assigning\n" << enode_pp(n1, *this) << "\n" << enode_pp(n2, *this) << "\n";
@@ -1306,7 +1306,7 @@ namespace smt {
             bool_var v = l.var();
             bool_var_data & d = get_bdata(v);
             lbool val  = get_assignment(v);
-            IF_VERBOSE(5, verbose_stream () << "propagate_atoms: #" << bool_var2expr(v)->get_id() << "\n" << mk_pp(bool_var2expr(v), m) << "\n";);
+            IF_VERBOSE(15, verbose_stream () << "propagate_atoms: #" << bool_var2expr(v)->get_id() << "\n" << mk_pp(bool_var2expr(v), m) << "\n";);
             CTRACE("propagate_atoms", v == 13, tout << "propagating atom, #" << bool_var2expr(v)->get_id() << ", is_enode(): " << d.is_enode()
                   << " tag: " << (d.is_eq()?"eq":"") << (d.is_theory_atom()?"th":"") << (d.is_quantifier()?"q":"") << " " << l << "\n";);
             SASSERT(val != l_undef);
@@ -1387,7 +1387,7 @@ namespace smt {
        assigned to true (false).
     */
     void context::propagate_bool_var_enode(bool_var v) {
-        IF_VERBOSE(5, verbose_stream() << "propagate_bool_var_enode - var: " << v << " #" << bool_var2expr(v)->get_id() << "\n";);
+        IF_VERBOSE(15, verbose_stream() << "propagate_bool_var_enode - var: " << v << " #" << bool_var2expr(v)->get_id() << "\n";);
         SASSERT(get_assignment(v) != l_undef);
         SASSERT(get_bdata(v).is_enode());
         lbool val  = get_assignment(v);
@@ -1546,7 +1546,7 @@ namespace smt {
                     m_atom_propagation_queue.push_back(literal(v, val == l_false));
             }
         }
-        IF_VERBOSE(5, verbose_stream() << "propagate_relevancy: marking as relevant:\n" << mk_bounded_pp(n, m) << "\nscope_level: " << m_scope_lvl << "\n";);
+        IF_VERBOSE(15, verbose_stream() << "propagate_relevancy: marking as relevant:\n" << mk_bounded_pp(n, m) << "\nscope_level: " << m_scope_lvl << "\n";);
         TRACE("propagate_relevancy", tout << "marking as relevant:\n" << mk_bounded_pp(n, m) << " " << m_scope_lvl << "\n";);
         m_case_split_queue->relevant_eh(n);
 
@@ -1678,7 +1678,7 @@ namespace smt {
        congruences cannot be retracted to a consistent state.
      */
     bool context::propagate() {
-        IF_VERBOSE(5, verbose_stream() << "propagating... " << m_qhead << ":" << m_assigned_literals.size() << "\n";);
+        IF_VERBOSE(15, verbose_stream() << "propagating... " << m_qhead << ":" << m_assigned_literals.size() << "\n";);
         TRACE("propagate", tout << "propagating... " << m_qhead << ":" << m_assigned_literals.size() << "\n";);
         while (true) {
             if (inconsistent())
@@ -3091,9 +3091,9 @@ namespace smt {
         if (get_cancel_flag()) return;
         TRACE("internalize_assertions", tout << "internalize_assertions()...\n";);
         timeit tt(get_verbosity_level() >= 100, "smt.preprocessing");
-        // IF_VERBOSE(5, verbose_stream() << "\nbefore reduce_assertions...\n";);
-        // IF_VERBOSE(5, m_asserted_formulas.display(verbose_stream()););
-        // IF_VERBOSE(5, verbose_stream() << "\n";);
+        // IF_VERBOSE(15, verbose_stream() << "\nbefore reduce_assertions...\n";);
+        // IF_VERBOSE(15, m_asserted_formulas.display(verbose_stream()););
+        // IF_VERBOSE(15, verbose_stream() << "\n";);
         reduce_assertions();
         if (get_cancel_flag()) return;
         if (!m_asserted_formulas.inconsistent()) {
@@ -3107,9 +3107,9 @@ namespace smt {
                 expr * f   = m_asserted_formulas.get_formula(qhead);
                 proof * pr = m_asserted_formulas.get_formula_proof(qhead);
                 SASSERT(!pr || f == m.get_fact(pr));
-                IF_VERBOSE(5, verbose_stream() << "\nbefore internalize_assertion:\n" << mk_pp(f, m) << "\n";);
+                IF_VERBOSE(15, verbose_stream() << "\nbefore internalize_assertion:\n" << mk_pp(f, m) << "\n";);
                 internalize_assertion(f, pr, 0);
-                IF_VERBOSE(5, verbose_stream() << "assignment after one internalize_assertion:\n"; display_assignment(verbose_stream()); verbose_stream() << "\n";);
+                IF_VERBOSE(15, verbose_stream() << "assignment after one internalize_assertion:\n"; display_assignment(verbose_stream()); verbose_stream() << "\n";);
                 qhead++;
             }
             m_asserted_formulas.commit();
@@ -3494,9 +3494,9 @@ namespace smt {
     }
 
     lbool context::check(unsigned num_assumptions, expr * const * assumptions, bool reset_cancel) {
-        // IF_VERBOSE(5, verbose_stream() << "\ncontext.check: asserted_formulas\n";);
-        // IF_VERBOSE(5, m_asserted_formulas.display(verbose_stream()););
-        // IF_VERBOSE(5, verbose_stream() << "\n";);
+        // IF_VERBOSE(15, verbose_stream() << "\ncontext.check: asserted_formulas\n";);
+        // IF_VERBOSE(15, m_asserted_formulas.display(verbose_stream()););
+        // IF_VERBOSE(15, verbose_stream() << "\n";);
         if (!check_preamble(reset_cancel)) return l_undef;
         SASSERT(at_base_level());
         setup_context(false);
@@ -3509,14 +3509,14 @@ namespace smt {
         do {
             pop_to_base_lvl();
             expr_ref_vector asms(m, num_assumptions, assumptions);
-            // IF_VERBOSE(5, verbose_stream() << "assignment before internalize_assertions():\n"; display_assignment(verbose_stream()); verbose_stream() << "\n";);
+            // IF_VERBOSE(15, verbose_stream() << "assignment before internalize_assertions():\n"; display_assignment(verbose_stream()); verbose_stream() << "\n";);
             internalize_assertions();
-            IF_VERBOSE(5, verbose_stream() << "assignment after internalize_assertions():\n"; display_assignment(verbose_stream()); verbose_stream() << "\n";);
+            IF_VERBOSE(15, verbose_stream() << "assignment after internalize_assertions():\n"; display_assignment(verbose_stream()); verbose_stream() << "\n";);
             add_theory_assumptions(asms);                
             TRACE("unsat_core_bug", tout << asms << "\n";);        
             init_assumptions(asms);
             TRACE("before_search", display(tout););
-            // IF_VERBOSE(5, verbose_stream() << "assignment before search():\n"; display_assignment(verbose_stream()); );
+            // IF_VERBOSE(15, verbose_stream() << "assignment before search():\n"; display_assignment(verbose_stream()); );
             r = search();
             r = mk_unsat_core(r);        
         }
@@ -4322,7 +4322,7 @@ namespace smt {
         expr * _lhs = lhs->get_owner();
         expr * _rhs = rhs->get_owner();
         expr * eq = mk_eq_atom(_lhs, _rhs);
-        IF_VERBOSE(5, verbose_stream() << "assume_eq:\n" << mk_pp(eq, m) << "\n";);
+        IF_VERBOSE(15, verbose_stream() << "assume_eq:\n" << mk_pp(eq, m) << "\n";);
         TRACE("assume_eq", tout << "creating interface eq:\n" << mk_pp(eq, m) << "\n";);
         if (m.is_false(eq)) {
             return false;

@@ -662,10 +662,10 @@ bool arith_rewriter::is_arith_term(expr * n) const {
 }
 
 br_status arith_rewriter::mk_eq_core(expr * arg1, expr * arg2, expr_ref & result) {
-    IF_VERBOSE(5, verbose_stream() << "mk_eq_core: " << mk_pp(arg1, m()) << ", " << mk_pp(arg2, m()) << "\n"; );
+    IF_VERBOSE(15, verbose_stream() << "mk_eq_core: " << mk_pp(arg1, m()) << ", " << mk_pp(arg2, m()) << "\n"; );
     br_status st = BR_FAILED;
     if (m_eq2ineq) {
-        IF_VERBOSE(5, verbose_stream() << "mk_eq_core: EQ = LE & GE\n"; );
+        IF_VERBOSE(15, verbose_stream() << "mk_eq_core: EQ = LE & GE\n"; );
         result = m().mk_and(m_util.mk_le(arg1, arg2), m_util.mk_ge(arg1, arg2));
         st = BR_REWRITE2;
         // numeral a1, a2;
@@ -687,7 +687,7 @@ br_status arith_rewriter::mk_eq_core(expr * arg1, expr * arg2, expr_ref & result
         // st = BR_REWRITE2;
     }
     else if (m_arith_lhs || is_arith_term(arg1) || is_arith_term(arg2)) {
-        IF_VERBOSE(5, verbose_stream() << "mk_eq_core: mk_le_ge_eq_core\n"; );
+        IF_VERBOSE(15, verbose_stream() << "mk_eq_core: mk_le_ge_eq_core\n"; );
         st = mk_le_ge_eq_core(arg1, arg2, EQ, result);
     }
     return st;
