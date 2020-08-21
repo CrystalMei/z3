@@ -567,6 +567,19 @@ public:
         return -1;
     }
 
+    int back_index(T const & elem) const {
+        const_iterator b  = begin() - 1;
+        const_iterator it = end() - 1;
+        SZ idx = size() - 1;
+        for (; it != b; --it) {
+            if (*it == elem) {
+                return idx;
+            }
+            idx -= 1;
+        }
+        return -1;
+    }
+    
     // set pos idx with elem. If idx >= size, then expand using default.
     void setx(SZ idx, T const & elem, T const & d) {
         if (idx >= size()) {

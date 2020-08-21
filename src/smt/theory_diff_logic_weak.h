@@ -159,7 +159,9 @@ namespace smt {
         struct scope {
             unsigned      m_atoms_lim;
             unsigned      m_asserted_atoms_lim;
+            unsigned      m_equation_lim;
             unsigned      m_asserted_qhead_old;
+            unsigned      m_equation_qhead_old;
         };
         typedef dl_graph<GExt> Graph;
 
@@ -207,8 +209,7 @@ namespace smt {
         int_vector                     m_equation_kept;
         int_vector                     m_equation_elim;
         svector<numeral>               m_equation_weight;
-
-        svector<unsigned>         m_equation_track;      
+        unsigned                       m_equation_qhead;
 
         struct var_value_hash;
         friend struct var_value_hash;
@@ -280,8 +281,6 @@ namespace smt {
         bool use_diseqs() const override { return true; }
 
         void new_diseq_eh(theory_var v1, theory_var v2) override;
-
-        void push_equations(unsigned);
 
         void push_scope_eh() override;
 
