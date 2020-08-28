@@ -597,7 +597,7 @@ void theory_diff_logic_weak<Ext>::internalize_eq_eh(app * atom, bool_var v) {
     }
 }
 
-
+/* // WDL with equation substitution
 template<typename Ext>
 void theory_diff_logic_weak<Ext>::assign_eh(bool_var v, bool is_true) {
     IF_VERBOSE(5, verbose_stream() << "W-DL: assign_eh: " << v << ": " << is_true << "\n";);
@@ -827,7 +827,7 @@ void theory_diff_logic_weak<Ext>::assign_eh(bool_var v, bool is_true) {
         // set the original edge
         m_asserted_atoms.push_back(a);
 
-        // /* set edge with -1 weight */
+        // // set edge with -1 weight
         // // weight 0 or edge to 0 : use original atom
         // if (pos_wgt == numeral(0) || tgt == 0 || src == 0) {
         //     IF_VERBOSE(5, verbose_stream() << "W-DL: assign_eh - edge with weight 0 or edge to 0 - original atom\n";);
@@ -867,15 +867,15 @@ void theory_diff_logic_weak<Ext>::assign_eh(bool_var v, bool is_true) {
         numeral neg_wgt_new = neg_wgt + equ_wgt;
         edge_id pos; edge_id neg;
 
-        // /* original edges */
+        // // original edges
         // pos = m_graph.add_edge(src, tgt, pos_wgt, pos_exp);
         // neg = m_graph.add_edge(tgt, src, neg_wgt, neg_exp);
 
-        /* set edge with correct weight */
+        // set edge with correct weight 
         pos = m_graph.add_edge(src, tgt_old, pos_wgt_new, pos_exp);
         neg = m_graph.add_edge(tgt_old, src, neg_wgt_new, neg_exp);
 
-        // /* set edge with -1 weight */
+        // // set edge with -1 weight
         // if (pos_wgt_new == numeral(0) || tgt_old == 0 || src == 0)
         //     pos = m_graph.add_edge(src, tgt_old, pos_wgt_new, pos_exp);
         // else if (pos_wgt_new < numeral(0))
@@ -908,15 +908,15 @@ void theory_diff_logic_weak<Ext>::assign_eh(bool_var v, bool is_true) {
         numeral neg_wgt_new = neg_wgt - equ_wgt;
         edge_id pos; edge_id neg;
 
-        // /* original edges */
+        // // original edges
         // pos = m_graph.add_edge(src, tgt, pos_wgt, pos_exp);
         // neg = m_graph.add_edge(tgt, src, neg_wgt, neg_exp);
 
-        /* set edge with correct weight */
+        // set edge with correct weight
         pos = m_graph.add_edge(src_old, tgt, pos_wgt_new, pos_exp);
         neg = m_graph.add_edge(tgt, src_old, neg_wgt_new, neg_exp);
 
-        // /* set edge with -1 weight */
+        // // set edge with -1 weight
         // if (pos_wgt_new == numeral(0) || tgt == 0 || src_old == 0)
         //     pos = m_graph.add_edge(src_old, tgt, pos_wgt_new, pos_exp);
         // else if (pos_wgt_new < numeral(0))
@@ -954,15 +954,15 @@ void theory_diff_logic_weak<Ext>::assign_eh(bool_var v, bool is_true) {
         numeral neg_wgt_new = neg_wgt - src_equ_wgt + tgt_equ_wgt;
         edge_id pos; edge_id neg;
 
-        // /* original edges */
+        // // original edges
         // pos = m_graph.add_edge(src, tgt, pos_wgt, pos_exp);
         // neg = m_graph.add_edge(tgt, src, neg_wgt, neg_exp);
 
-        /* set edge with correct weight */
+        // set edge with correct weight
         pos = m_graph.add_edge(src_old, tgt_old, pos_wgt_new, pos_exp);
         neg = m_graph.add_edge(tgt_old, src_old, neg_wgt_new, neg_exp);
 
-        // /* set edge with -1 weight */
+        // // set edge with -1 weight
         // if (pos_wgt_new == numeral(0) || tgt_old == 0 || src_old == 0)
         //     pos = m_graph.add_edge(src_old, tgt_old, pos_wgt_new, pos_exp);
         // else if (pos_wgt_new < numeral(0))
@@ -992,6 +992,97 @@ void theory_diff_logic_weak<Ext>::assign_eh(bool_var v, bool is_true) {
     }
     // IF_VERBOSE(15, verbose_stream() << "\nW-DL: dl-graph display:\n"; display(verbose_stream()); );
     IF_VERBOSE(5, verbose_stream() << "\nW-DL: equation list display:\nkeep: " << m_equation_kept << "\nelim: " << m_equation_elim << "\nweig: "; display_equws(verbose_stream(), m_equation_weight););
+}
+*/
+
+/* WDL with weight relaxation */
+template<typename Ext>
+void theory_diff_logic_weak<Ext>::assign_eh(bool_var v, bool is_true) {
+    IF_VERBOSE(5, verbose_stream() << "W-DL: assign_eh: " << v << ": " << is_true << "\n";);
+    m_stats.m_num_assertions++;
+    atom * a = nullptr;
+    // if (m_bool_var2atom.find(v, a)) {
+    VERIFY (m_bool_var2atom.find(v, a));
+    SASSERT(a);
+    SASSERT(ctx.get_assignment(v) != l_undef);
+    SASSERT((ctx.get_assignment(v) == l_true) == is_true);
+    a->assign_eh(is_true);
+
+    // m_asserted_atoms.push_back(a);
+
+    edge_id asserted_edge_id = a->get_asserted_edge();
+    edge_id asserted_edge_pos_id = a->get_pos();
+    edge_id asserted_edge_neg_id = a->get_neg();
+    theory_var src = m_graph.get_source(asserted_edge_pos_id);
+    theory_var tgt = m_graph.get_target(asserted_edge_pos_id);
+    theory_var src_ = m_graph.get_source(asserted_edge_neg_id);
+    theory_var tgt_ = m_graph.get_target(asserted_edge_neg_id);
+    SASSERT ( src == tgt_ );
+    SASSERT ( tgt == src_ );
+    literal pos_exp = m_graph.get_explanation(asserted_edge_pos_id);
+    literal neg_exp = m_graph.get_explanation(asserted_edge_neg_id);
+    numeral pos_wgt = m_graph.get_weight(asserted_edge_pos_id);
+    numeral neg_wgt = m_graph.get_weight(asserted_edge_neg_id);
+
+    // // set the original edge
+    // m_asserted_atoms.push_back(a);
+
+    // always keep equations
+    if (!m_asserted_atoms.empty()) {
+        IF_VERBOSE(5, verbose_stream() << "W-DL: check EQUAL first\n";);
+        atom * last_a = m_asserted_atoms.back();
+        // both pos_edge should be selected
+        if (last_a->is_true() && is_true) {
+            IF_VERBOSE(5, verbose_stream() << "W-DL: previous and current are true\n";);
+            bool_var prev_v = last_a->get_bool_var();
+            atom * prev_a = nullptr;
+            m_bool_var2atom.find(prev_v, prev_a);
+            edge_id prev_edge_pos_id = prev_a->get_pos();
+            // edge_id prev_edge_pos_id = last_a->get_pos();s
+            theory_var prev_src = m_graph.get_source(prev_edge_pos_id);
+            theory_var prev_tgt = m_graph.get_target(prev_edge_pos_id);
+            numeral prev_wgt = m_graph.get_weight(prev_edge_pos_id);
+            literal prev_exp = m_graph.get_explanation(prev_edge_pos_id);
+            IF_VERBOSE(5, verbose_stream() << "W-DL: previous src and tgt: " << prev_src << " " << prev_tgt << "\n";);
+            // check equal
+            if ((prev_src == tgt) && (prev_tgt == src) && (prev_wgt + pos_wgt == numeral(0))) {
+                IF_VERBOSE(5, verbose_stream() << "W-DL: EQUAL\n";);
+                m_asserted_atoms.push_back(a);
+                return;
+            }
+        }
+    }
+    // set edge with -1 weight
+    // weight 0 or edge to 0 : use original atom
+    if (pos_wgt == numeral(0) || tgt == 0 || src == 0) {
+        IF_VERBOSE(5, verbose_stream() << "W-DL: assign_eh (weight relaxation) - edge with weight 0 or edge to 0 - original atom\n";);
+        m_asserted_atoms.push_back(a);
+    }
+    // pos_weg < 0; keep positive edge -1; remove negative edge if weight != 0
+    else if (pos_wgt < numeral(0)) {
+        IF_VERBOSE(5, verbose_stream() << "W-DL: assign_eh (weight relaxation) - edge with weight [" << pos_wgt << "] < 0 - only pos_edge (weight " << pos_wgt << ") or neg_edge (weight 0)\n";);            
+        edge_id pos = m_graph.add_edge(src, tgt, numeral(-1), pos_exp);
+        edge_id neg;
+        if (neg_wgt == numeral(0))
+            neg = m_graph.add_edge(tgt, src, neg_wgt, neg_exp);
+        else
+            neg = null_edge_id;
+        atom * new_a = alloc(atom, v, pos, neg);
+        m_atoms.push_back(new_a);
+        new_a->assign_eh(is_true);
+        m_asserted_atoms.push_back(new_a);
+    }
+    // pos_wgt > 0, neg_wgt < 0; keep negative edge -1, remove positive edge
+    else {
+        IF_VERBOSE(5, verbose_stream() << "W-DL: assign_eh (weight relaxation) - edge with weight [" << pos_wgt << "] > 0 - only neg_edge (weight " << neg_wgt << ")\n";);            
+        edge_id pos = null_edge_id;
+        edge_id neg = m_graph.add_edge(tgt, src, numeral(-1), neg_exp);
+        atom * new_a = alloc(atom, v, pos, neg);
+        m_atoms.push_back(new_a);
+        new_a->assign_eh(is_true);
+        m_asserted_atoms.push_back(new_a);
+    }
+    IF_VERBOSE(15, verbose_stream() << "\nW-DL: dl-graph display:\n"; display(verbose_stream()); );
 }
 
 
